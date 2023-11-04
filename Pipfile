@@ -9,6 +9,7 @@ djangorestframework = "*"
 python-dotenv = "*"
 pillow = "*"
 whitenoise = "*"
+django-svelte = "*"
 
 [dev-packages]
 black = "*"

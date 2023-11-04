@@ -1,0 +1,20 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Svelte + TS</title>
+
+    <link rel='icon' type='image/png' href="{% static 'frontend/favicon.png' %}"> <!-- <-- here -->
+    <link rel='stylesheet' href="{% static 'frontend/global.css' %}"> <!-- <-- here -->
+    
+    
+    <script defer src="{% static 'frontend/bundle.js' %}"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>

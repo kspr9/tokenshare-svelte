@@ -17,6 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+
+from tokenshare.views import SpaView
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("", SpaView.as_view(), name="spa"),
 ]

@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
 """
 Django settings for core project.
 
@@ -20,10 +24,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-a+80a06sqkem8!946+x-jb49lt%-nv!!+7*)awzg(&o&+xp%!g"
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG can be True/False or 1/0
+DEBUG = int(os.environ.get('DEBUG', default=1))
 
 ALLOWED_HOSTS = []
 
@@ -37,10 +42,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "tokenshare",
+
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -54,7 +62,7 @@ ROOT_URLCONF = "core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "core" / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -115,9 +123,79 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "static/"
+'''
+    When you're ready to deploy, you'll run 'python manage.py collectstatic', 
+    and Django will copy the static files from 'core/static' 
+    (and any other app-specific 'static' directories) into 'core/staticfiles'. 
+    Then, in your production environment, you'd configure your web server to serve the files from core/staticfiles.
+'''
+STATIC_ROOT = os.path.join(BASE_DIR, "core", "staticfiles")
+STATIC_URL = "/static/"
+# this is from https://dev.to/besil/my-django-svelte-setup-for-fullstack-development-3an8
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "core", "static"),)
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+## For django-svelte conf
+# this is from https://github.com/thismatters/django-svelte
+#STATICFILES_DIRS = [
+#    BASE_DIR.parent / "svelte" / "public" / "build",
+#]
+
+
+
+
+## Logging conf
+
+'''
+The log levels are:
+    DEBUG: Low-level system information
+    INFO: General system information
+    WARNING: Minor problems related information
+    ERROR: Major problems related information
+    CRITICAL: Critical problems related information
+'''
+
+logging_level = (
+    "INFO" if "LOGGING_LEVEL" not in os.environ else os.environ["LOGGING_LEVEL"]
+)
+
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "console": {
+            "format": "[%(asctime)s][%(levelname)8s][%(name)16.16s]@[%(lineno)5s]$ %(message)s"
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "console",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+        "propagate": False,
+    },
+    "loggers": {
+        "django.server": {
+            "level": "WARNING",
+            "handlers": ["console"],
+            "propagate": False,
+        },
+        "core": {
+            "level": logging_level,
+            "handlers": ["console"],
+            "propagate": False,
+        },
+    },
+}
