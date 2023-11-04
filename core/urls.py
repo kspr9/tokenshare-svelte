@@ -18,10 +18,12 @@ from django.contrib import admin
 from django.urls import path, include
 
 
-from tokenshare.views import SpaView
+from core.tokenshare.views import SpaView
+from core.api.views import GreetingApi
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),
+    path("api/greet", GreetingApi.as_view()),
     path("", SpaView.as_view(), name="tokenshare"),
 ]
