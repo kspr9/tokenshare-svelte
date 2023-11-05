@@ -1,32 +1,37 @@
 <script lang="ts">
-  
-  import Counter from './lib/Counter.svelte';
+    
+    import Header from "./layout/Header.svelte";
+    import Navbar from "./layout/Navbar.svelte";
+    import Footer from "./layout/Footer.svelte";
+    import Content from "./layout/Content.svelte";
+    import AuthContent from "./layout/AuthContent.svelte";
 
-  import { onMount } from "svelte";
+    // local state variables - to be changed as per needs. Will be passed on to child components if needed
+    let isSignedIn = false;
 
-  export let name: string;
+    let name: string = "Kaspar";
 
-  let apimessage = "waiting for server...";
-
-  onMount(async () => {
-    let res = await fetch("/api/greet")
-    .then((res) => res.json());
-    console.log(res);
-    apimessage = JSON.stringify(res);
-  });
-
+    
 </script>
 
 <main>
-    <div class="card">
-      <Counter />
-    </div>  
-    <h1>Hello {name}!</h1>
+    <Header />
 
-    <h3>Data from server</h3>
-    {apimessage}
+    <Navbar {isSignedIn} />
+
+    {#if isSignedIn}
+        <div class="main-section">
+            <AuthContent {name}/>
+        </div>
+    {:else}
+        <div class="main-section">
+            <Content />
+        </div>
+    {/if}
+
+    <Footer />
+
 </main>
 
 <style>
-  
 </style>
