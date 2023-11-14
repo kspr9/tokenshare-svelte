@@ -2,7 +2,7 @@
 
 </script>
 
-<div>
+<div class="sidebar-container">
     <div class="sidebar-top">
         <a href="/profile">Workspaces</a>
         <a href="/messages">Messages</a>

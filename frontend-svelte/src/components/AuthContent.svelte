@@ -1,11 +1,13 @@
 <script lang="ts">
+    console.log("AuthContent component is being initialized");
     import Counter from "../lib/Counter.svelte";
     import Sidebar from "./Sidebar.svelte";
 
     import { onMount } from "svelte";
 
-    export let name: string;
-
+    export let username: string;
+    console.log("Username:", username);
+    
     let apimessage = "waiting for server...";
 
     onMount(async () => {
@@ -19,7 +21,7 @@
     <div class="sidebar-div">
         <Sidebar />
     </div>
-    <div class="content">
+    <div class="content-container">
         <!-- signed-in user content -->
         <h3>Welcome to your dashboard.</h3>
         To manage your companies or create one, navigate to your Workspaces
@@ -27,7 +29,7 @@
         <div class="card">
             <Counter />
         </div>
-        <h4>Hello {name}!</h4>
+        <h4>Hello {username}!</h4>
 
         <h3>Data from server</h3>
         {apimessage}

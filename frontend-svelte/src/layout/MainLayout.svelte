@@ -1,68 +1,56 @@
 <script lang="ts">
-    import Header from "../components/Header.svelte";
-    import Navbar from "../components/Navbar.svelte";
-    import Footer from "../components/Footer.svelte";
-    import Content from "../components/Content.svelte";
-    import AuthContent from "../components/AuthContent.svelte";
-
+    
     // local state variables - to be changed as per needs. Will be passed on to child components if needed
-    let isSignedIn = false;
+    export let isSignedIn: boolean;
 
-    let name: string = "Kaspar";
 </script>
 
 <div class="grid-container">
     <div class="grid-header">
-        <Header />
+        <slot name="header-content"/>
     </div>
 
     <div class="grid-navbar">
-        <Navbar {isSignedIn} />
+        <slot name="header-navbar" />
     </div>
-    
-    <main class="grid-main">
-        {#if isSignedIn}
-            <div class="main-section with-sidebar">
-                <AuthContent {name} />
-            </div>
-        {:else}
-            <div class="main-section no-sidebar">
-                <Content />
-            </div>
-        {/if}
+
+    <main class={isSignedIn ? "grid-main with-sidebar" : "grid-main no-sidebar"}>
+
+        <slot name="content" />
+        
     </main>
 
     <div class="grid-footer">
-        <Footer />
+        <slot name="footer" />
     </div>
 </div>
 
 <style>
+    .grid-header {
+        grid-area: gr-header;
+    }
+    
+    .grid-navbar {
+        grid-area: gr-navbar;
+    }
+    
+    .grid-main {
+        grid-area: gr-main;
+    }
+    
+    .grid-footer {
+        grid-area: gr-footer;
+    }
+
     .grid-container {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
         grid-template-rows: auto 1fr auto;
         grid-template-areas:
-            "header"
-            "navbar"
-            "content"
-            "footer";
+            "gr-header gr-navbar"
+            "gr-main gr-main"
+            "gr-footer gr-footer";
         min-height: 100vh;
     }
-
-    .grid-header {
-        grid-area: header;
-    }
-
-    .grid-navbar {
-        grid-area: navbar;
-    }
-
-    .grid-main {
-        grid-area: content;
-    }
-
-    .grid-footer {
-        grid-area: footer;
-    }
+    
 </style>

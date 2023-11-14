@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { Router, Link, Route } from "svelte-routing";
 
   // props declarations
   export let isSignedIn:boolean;
@@ -11,10 +12,10 @@
   <a href="/open-funding-calls">Open Funding Calls</a>
   {#if isSignedIn}
     <!-- Items shown when the user is signed in -->
-    <a href="/logout">Log Out</a>
+    <a href="accounts/logout">Log Out</a>
   {:else}
     <!-- Items shown when the user is not signed in -->
-    <a href="/signin">Sign In</a>
+    <a href="accounts/login">Sign In</a>
     <a href="/signup">Register</a>
   {/if}
 </nav>

@@ -7,7 +7,7 @@ from django.urls import reverse_lazy
 
 LOGIN_URL = reverse_lazy("login")
 LOGIN_REDIRECT_URL = reverse_lazy("tokenshare")
-LOGOUT_REDIRECT_URL = reverse_lazy("login")
+LOGOUT_REDIRECT_URL = reverse_lazy("tokenshare")
 
 """
 Django settings for core project.

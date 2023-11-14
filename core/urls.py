@@ -19,11 +19,12 @@ from django.urls import path, include
 
 
 from core.tokenshare.views import SpaView
-from core.api.views import GreetingApi
+from core.api.views import GreetingApi, AuthUserApi
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),
     path("api/greet", GreetingApi.as_view()),
+    path("api/auth-user", AuthUserApi.as_view()),
     path("", SpaView.as_view(), name="tokenshare"),
 ]
