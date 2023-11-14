@@ -14,6 +14,26 @@
 </div>
 
 <style>
+    .sidebar-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+    }
+
+    .sidebar-top {
+        align-self: flex-start;
+        place-items: center;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sidebar-bottom {
+        align-self: flex-end;
+        place-items: center;
+        display: flex;
+        flex-direction: column;
+    }
 
 
 </style>

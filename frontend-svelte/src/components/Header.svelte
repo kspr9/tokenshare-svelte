@@ -1,15 +1,16 @@
 <style>
-    header {
+    .title {
         background-color: #333;
         color: white;
         padding: 0rem;
-        font-size: 0.5em;
+        font-size: 1em;
         text-align: left;
         width: 100%;
+        margin-top: 1.25em;
     }
 </style>
 
 <header>
-    <h1>TokenShare Portal</h1>
+    <div class="title">TokenShare Portal</div>
     <!-- Your header content -->
 </header>

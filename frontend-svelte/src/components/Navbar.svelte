@@ -19,3 +19,14 @@
     <a href="/signup">Register</a>
   {/if}
 </nav>
+
+<style>
+    nav {
+        background-color: #333;
+        color: white;
+        font-size: 1em;
+        text-align: right;
+        width: 100%;
+        margin-top: 1.25em;
+    }
+</style>

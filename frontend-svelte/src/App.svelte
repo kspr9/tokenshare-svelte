@@ -1,5 +1,5 @@
 <script lang="ts">
-    
+    import './globals.css';
     import Header from "./components/Header.svelte";
     import Navbar from "./components/Navbar.svelte";
     import Content from "./components/Content.svelte";
@@ -9,7 +9,7 @@
 
     import { onMount } from "svelte";
 
-    let isSignedIn: boolean = false;
+    let isSignedIn: boolean = true;
     let username: string = "";
     let apimessage = "waiting for server...";
 
@@ -30,11 +30,7 @@
     <Header slot="header-content"/>
     <Navbar slot="header-navbar" {isSignedIn} />
     
-    {#if isSignedIn}
-        <AuthContent slot="content" {username} />        
-    {:else}
-        <Content slot="content" {isSignedIn}/>
-    {/if}
+    <AuthContent slot="content" {username} />
 
     <Footer slot="footer" />
 

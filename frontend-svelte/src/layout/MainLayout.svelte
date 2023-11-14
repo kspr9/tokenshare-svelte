@@ -26,6 +26,8 @@
 </div>
 
 <style>
+
+    
     .grid-header {
         grid-area: gr-header;
     }
@@ -51,6 +53,21 @@
             "gr-main gr-main"
             "gr-footer gr-footer";
         min-height: 100vh;
+        min-height: 100dvh;
+        width: 100vw;
+    }
+
+    .grid-main.with-sidebar {
+        display: grid;
+        grid-template-columns: 1fr 5fr;
+        grid-template-areas:
+            "gr-sidebar gr-content";
+    }
+    .grid-main.grid-main.with-sidebar:first-child {
+        grid-area: gr-sidebar;
+    }
+    .grid-main.grid-main.with-sidebar:last-child {
+        grid-area: gr-content;
     }
     
 </style>
