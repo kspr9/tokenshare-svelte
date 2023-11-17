@@ -1,11 +1,14 @@
 <script lang="ts">
     console.log("AuthContent component is being initialized");
+    import { onMount } from "svelte";
+    
     import Counter from "../lib/Counter.svelte";
 
-    import { onMount } from "svelte";
+    import type { UserProps } from '../types/userProps';
 
-    export let username: string;
-    console.log("Username:", username);
+    export let userProps: UserProps;
+
+    console.log("Username:", userProps.username);
     
     let apimessage = "waiting for server...";
 
@@ -19,13 +22,14 @@
 
 <div class="content-container">
     <!-- signed-in user content -->
+    <h4>Hello {userProps.username}!</h4>
     <h3>Welcome to your dashboard.</h3>
     To manage your companies or create one, navigate to your Workspaces
     <br>
     <div class="card">
         <Counter />
     </div>
-    <h4>Hello {username}!</h4>
+    
 
     <h3>Data from server</h3>
     {apimessage}

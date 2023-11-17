@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 
-from core.tokenshare.views import SpaView
+from core.tokenshare.views import AuthSpaView, NoAuthSpaView
 from core.api.views import GreetingApi, AuthUserApi
 
 urlpatterns = [
@@ -26,5 +26,6 @@ urlpatterns = [
     path("accounts/", include("django.contrib.auth.urls")),
     path("api/greet", GreetingApi.as_view()),
     path("api/auth-user", AuthUserApi.as_view()),
-    path("", SpaView.as_view(), name="tokenshare"),
+    path("app/", AuthSpaView.as_view(), name="tokenshare"),
+    path('', NoAuthSpaView.as_view(), name='home'),
 ]

@@ -28,12 +28,11 @@ class AuthUserApi(APIView):
         if is_signed_in:
             # Accessing user model fields like username or other fields
             user_data = {
+                'pk': user.pk,  # Primary key of the user
                 'username': user.username,
-                # Add other user model fields here as needed
-                # 'email': user.email,
-                # 'first_name': user.first_name,
-                # 'last_name': user.last_name,
-                # etc.
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
             }
         else:
             user_data = {}

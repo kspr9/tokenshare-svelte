@@ -1,3 +1,8 @@
+<script lang="ts">
+    import Navbar from "./Navbar.svelte";
+    export let isSignedIn:boolean;
+</script>
+
 <style>
     .title {
         background-color: #333;
@@ -8,9 +13,21 @@
         width: 100%;
         margin-top: 1.25em;
     }
+
+    .logo {
+        background-color: green;
+        height: 25%;
+    }
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        /* Additional styling */
+    }
 </style>
 
 <header>
+    <div class="logo"></div>
     <div class="title">TokenShare Portal</div>
-    <!-- Your header content -->
+    <Navbar {isSignedIn} />
 </header>
