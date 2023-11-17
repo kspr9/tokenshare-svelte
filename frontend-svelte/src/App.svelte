@@ -26,18 +26,27 @@
     let userProps: UserProps;
 
     onMount(async () => {
-        let res = await fetch("/api/auth-user").then((res) => res.json());
-        console.log(res);
-        apimessage = JSON.stringify(res);
-        userProps = {
-            pk: res.userData.pk,
-            username: res.userData.username,
-            email: res.userData.email,
-            first_name: res.userData.first_name,
-            last_name: res.userData.last_name
-        };
-        isSignedIn = res.isSignedIn;
-        console.log(isSignedIn, userProps.username);
+        try {
+            let res = await fetch("/api/auth-user");
+            if (!res.ok) {
+                throw new Error("Network response was not ok");
+            }
+            let data = await res.json();
+            console.log(data);
+            apimessage = JSON.stringify(data);
+            userProps = {
+                pk: data.userData.pk,
+                username: data.userData.username,
+                email: data.userData.email,
+                first_name: data.userData.first_name,
+                last_name: data.userData.last_name
+            };
+            isSignedIn = data.isSignedIn;
+            console.log(isSignedIn, userProps.username);
+        } catch (error) {
+            console.error('Unauthenticated user session:', error);
+            isSignedIn = false;
+        }
     });
     // console.log(isSignedIn, userProps.username);
     
