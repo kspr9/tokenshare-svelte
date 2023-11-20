@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Router, Link, Route } from "svelte-routing";
-    import { isAuthenticated } from '../stores/userSession';
+    import { isAuthenticated } from "../stores/isAuthenticatedStore";
     
     let logoutUrl = `${window.location.origin}/accounts/logout`;
     

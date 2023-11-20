@@ -5,12 +5,13 @@
 
 <div class="sidebar-container">
     <div class="sidebar-top">
-        <Link to="/workspaces">Workspaces</Link>
-        <Link to="/messages">Messages</Link>
+        <Link to="/app/dashboard">Dashboard</Link>
+        <Link to="/app/workspaces">Workspaces</Link>
+        <Link to="/app/messages">Messages</Link>
     </div>
     <div class="sidebar-bottom">
-        <Link to="/profile">Profile</Link>
-        <Link to="/settings">Settings</Link>
+        <Link to="/app/profile">Profile</Link>
+        <Link to="/app/settings">Settings</Link>
     </div>
 </div>
 

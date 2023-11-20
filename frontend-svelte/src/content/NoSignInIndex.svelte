@@ -1,6 +1,6 @@
 <script lang="ts">
     
-    import { isAuthenticated } from '../stores/userSession';
+    import { isAuthenticated } from "../stores/isAuthenticatedStore";
 </script>
 
 <div class="content-container-no-signin">

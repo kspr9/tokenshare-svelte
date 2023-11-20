@@ -9,6 +9,7 @@
     //import Navbar from "./components/Navbar.svelte";
     import Sidebar from "./components/Sidebar.svelte";
     import Profile from "./content/Profile.svelte";
+    import Dashboard from "./content/Dashboard.svelte";
     import Workspaces from "./content/Workspaces.svelte";
     import Messages from "./content/Messages.svelte";
     import Settings from "./content/Settings.svelte";
@@ -21,51 +22,58 @@
     import type { UserProps } from './types/userProps';
 
     // Store imports
-    import { isAuthenticated } from "./stores/userSession";
+    import { isAuthenticated } from "./stores/isAuthenticatedStore";
+    import { userData } from "./stores/userDataStore";
     
 
     let apimessage = "waiting for server...";
     
     let userProps: UserProps;
     
+    
+
     console.log("This is before the onMount");
     console.log($isAuthenticated);
     console.log("--------------");
     onMount(async () => {
-        console.log("This is before the checkAuthenticationAndUpdateStore function");
+        console.log("This is before the checkAuthentication function");
         console.log($isAuthenticated);
-        console.log("awaiting check-auth during onMount");
-        await checkAuthenticationAndUpdateStore();
-        console.log("await check-auth completed during onMount");
-        console.log("This is after the await checkAuthenticationAndUpdateStore function");
+        console.log("Calling check-auth during onMount");
+
+        const checkedAuthData = await checkAuthentication();
+        $isAuthenticated = checkedAuthData.isAuthenticated;
+
+        console.log("Await check-auth completed during onMount");
+        console.log("This is isAuthenticated state after the await checkAuthentication function");
         console.log($isAuthenticated);
+
         if ($isAuthenticated) {
             console.log("This should run ONLY when the user is authenticated");
-            await fetchAuthenticatedUser();
+            const fetchedUserProps = await fetchUserProps();
+            $userData = fetchedUserProps;
         }
     });
 
-    // Function to check authentication and update store
-    async function checkAuthenticationAndUpdateStore() {
+    // Function to check authentication
+    async function checkAuthentication() {
         console.log("Fetching check-auth data");
         let res = await fetch('/api/check-auth/');
         let data = await res.json();
-        console.log("got the check-auth data");
-        if (data.is_authenticated) {
-            isAuthenticated.set(data.is_authenticated);  // Update the store value
-            console.log("User is authenticated and isAuthenticated state changed");
-            console.log($isAuthenticated);
-            console.log("Auth check performed successfully");
+        console.log("Got the check-auth data from server");
+        let isAuthenticated: boolean = data.is_authenticated;
+        let authMessage:string = "";
+        if (isAuthenticated) {
+            authMessage += "User is authenticated. ";
+            authMessage += "Auth check performed successfully. ";
         } else {
-            console.log("User is not authenticated");
-            $isAuthenticated = false;  // Update the store value
-            console.log("isAuthenticated state (using $store= syntax):");
-            console.log($isAuthenticated);
+            authMessage += "User is not authenticated";
+            authMessage += "Auth check performed successfully. ";
         };
+        return {isAuthenticated, "message": authMessage};
     }
 
     // Function to fetch authenticated user data
-    async function fetchAuthenticatedUser() {
+    async function fetchUserProps() {
         try {
             let res = await fetch("/api/auth-user");
             if (!res.ok) {
@@ -73,8 +81,8 @@
             }
             let data = await res.json();
             console.log(data);
-            apimessage = JSON.stringify(data);
-            userProps = {
+
+            const userProps = {
                 pk: data.userData.pk,
                 username: data.userData.username,
                 email: data.userData.email,
@@ -82,8 +90,11 @@
                 last_name: data.userData.last_name
             };
             console.log(userProps.username);
+
+            return userProps;
         } catch (error) {
             console.error('Unauthenticated user session:', error);
+            throw error; // Re-throw the error to handle it in the calling context
         }
     }
 
@@ -98,13 +109,23 @@
 
         
         {#if $isAuthenticated}
-            <Sidebar />
-            <Route path="">
-                <Workspaces {userProps} />
-            </Route>
-            <Route path="/messages" component={Messages} />
-            <Route path="/profile" component={Profile} />
-            <Route path="/settings" component={Settings} />
+            {#await fetchUserProps()}
+                <!-- Loading state -->
+                <p>Loading user data...</p>
+            {:then}
+                <!-- Success state -->
+                <Sidebar />
+                <Route path="" component={Dashboard} />
+                <Route path="/app/workspaces">
+                    <Workspaces />
+                </Route>
+                <Route path="/app/messages" component={Messages} />
+                <Route path="/app/profile" component={Profile} />
+                <Route path="/app/settings" component={Settings} />
+            {:catch error}
+                <!-- Error state -->
+                <p>Error loading user data: {error.message}</p>
+            {/await}
         {:else}
             <Route path="" component={NoSignInIndex} />
         {/if}
