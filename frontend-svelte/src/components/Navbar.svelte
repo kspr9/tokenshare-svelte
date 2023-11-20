@@ -1,8 +1,10 @@
 <script lang="ts">
     import { Router, Link, Route } from "svelte-routing";
+    import { isAuthenticated } from '../stores/userSession';
+    
+    let logoutUrl = `${window.location.origin}/accounts/logout`;
+    
 
-  // props declarations
-  export let isSignedIn:boolean;
 </script>
 
 <nav>
@@ -10,12 +12,12 @@
   <a href="/">Home</a>
   <a href="/about">About</a>
   <a href="/open-funding-calls">Open Funding Calls</a>
-  {#if isSignedIn}
+  {#if $isAuthenticated}
     <!-- Items shown when the user is signed in -->
-    <a href="accounts/logout">Log Out</a>
+    <a href={logoutUrl}>Log Out</a>
   {:else}
     <!-- Items shown when the user is not signed in -->
-    <a href="accounts/login">Sign In</a>
+    <a href="/accounts/login">Sign In</a>
     <a href="/signup">Register</a>
   {/if}
 </nav>

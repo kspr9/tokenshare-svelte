@@ -1,6 +1,5 @@
 <script lang="ts">
     import Navbar from "./Navbar.svelte";
-    export let isSignedIn:boolean;
 </script>
 
 <style>
@@ -29,5 +28,5 @@
 <header>
     <div class="logo"></div>
     <div class="title">TokenShare Portal</div>
-    <Navbar {isSignedIn} />
+    <Navbar />
 </header>

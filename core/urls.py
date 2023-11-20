@@ -19,13 +19,15 @@ from django.urls import path, include
 
 
 from core.tokenshare.views import AuthSpaView, NoAuthSpaView
-from core.api.views import GreetingApi, AuthUserApi
+from core.api.views import GreetingApi, LoginAPIView, AuthUserApi, check_authentication_status
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),
     path("api/greet", GreetingApi.as_view()),
+    path('api/check-auth/', check_authentication_status, name='check-auth'),
     path("api/auth-user", AuthUserApi.as_view()),
+    path('api/login', LoginAPIView.as_view(), name='api_login'),
     path("app/", AuthSpaView.as_view(), name="tokenshare"),
     path('', NoAuthSpaView.as_view(), name='home'),
 ]

@@ -17,15 +17,55 @@
     //import MainLayout from "./layout/MainLayout.svelte";
     import Footer from "./components/Footer.svelte";
 
-    // type imports
+    // Type imports
     import type { UserProps } from './types/userProps';
 
-    let isSignedIn: boolean = false;
+    // Store imports
+    import { isAuthenticated } from "./stores/userSession";
+    
+
     let apimessage = "waiting for server...";
     
     let userProps: UserProps;
-
+    
+    console.log("This is before the onMount");
+    console.log($isAuthenticated);
+    console.log("--------------");
     onMount(async () => {
+        console.log("This is before the checkAuthenticationAndUpdateStore function");
+        console.log($isAuthenticated);
+        console.log("awaiting check-auth during onMount");
+        await checkAuthenticationAndUpdateStore();
+        console.log("await check-auth completed during onMount");
+        console.log("This is after the await checkAuthenticationAndUpdateStore function");
+        console.log($isAuthenticated);
+        if ($isAuthenticated) {
+            console.log("This should run ONLY when the user is authenticated");
+            await fetchAuthenticatedUser();
+        }
+    });
+
+    // Function to check authentication and update store
+    async function checkAuthenticationAndUpdateStore() {
+        console.log("Fetching check-auth data");
+        let res = await fetch('/api/check-auth/');
+        let data = await res.json();
+        console.log("got the check-auth data");
+        if (data.is_authenticated) {
+            isAuthenticated.set(data.is_authenticated);  // Update the store value
+            console.log("User is authenticated and isAuthenticated state changed");
+            console.log($isAuthenticated);
+            console.log("Auth check performed successfully");
+        } else {
+            console.log("User is not authenticated");
+            $isAuthenticated = false;  // Update the store value
+            console.log("isAuthenticated state (using $store= syntax):");
+            console.log($isAuthenticated);
+        };
+    }
+
+    // Function to fetch authenticated user data
+    async function fetchAuthenticatedUser() {
         try {
             let res = await fetch("/api/auth-user");
             if (!res.ok) {
@@ -41,24 +81,23 @@
                 first_name: data.userData.first_name,
                 last_name: data.userData.last_name
             };
-            isSignedIn = data.isSignedIn;
-            console.log(isSignedIn, userProps.username);
+            console.log(userProps.username);
         } catch (error) {
             console.error('Unauthenticated user session:', error);
-            isSignedIn = false;
         }
-    });
-    // console.log(isSignedIn, userProps.username);
-    
+    }
 
+    //let promise = fetchAuthenticatedUser();
+    
 </script>
 
-<Header {isSignedIn}/>
+<Header />
 
 <Router>
-    <main class={isSignedIn ? "grid-main with-sidebar" : "grid-main no-sidebar"}>
+    <main class={$isAuthenticated ? "grid-main with-sidebar" : "grid-main no-sidebar"}>
 
-        {#if isSignedIn}
+        
+        {#if $isAuthenticated}
             <Sidebar />
             <Route path="">
                 <Workspaces {userProps} />
@@ -67,7 +106,7 @@
             <Route path="/profile" component={Profile} />
             <Route path="/settings" component={Settings} />
         {:else}
-            <Route path="" component={NoSignInIndex} {isSignedIn}/>
+            <Route path="" component={NoSignInIndex} />
         {/if}
     
     </main>

@@ -1,10 +1,11 @@
 <script lang="ts">
-    export let isSignedIn: boolean;
+    
+    import { isAuthenticated } from '../stores/userSession';
 </script>
 
 <div class="content-container-no-signin">
     <h2>Welcome to TokenShare portal</h2>
-    <h3>You are signed in? {isSignedIn}</h3>
+    <h3>You are signed in? {$isAuthenticated}</h3>
     <p>Tokenshare enables digitization of all governance operations of your company.</p>
     <p>
         This means, you can issue shares, transfer share ownership, hold shareholder meetings and vote on decisions.

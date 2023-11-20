@@ -4,7 +4,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte'
 // Import the path module to resolve paths
 import path from 'path';
 
-// Configure Vite to proxy API requests to Django to avoid CORS issues
+// Configuring Vite to proxy API requests to Django to avoid CORS issues
 // https://vitejs.dev/config/server-options.html#server-proxy
 
 // https://vitejs.dev/config/
