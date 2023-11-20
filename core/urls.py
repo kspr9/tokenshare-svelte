@@ -28,6 +28,6 @@ urlpatterns = [
     path('api/check-auth/', check_authentication_status, name='check-auth'),
     path("api/auth-user", AuthUserApi.as_view()),
     path('api/login', LoginAPIView.as_view(), name='api_login'),
-    path("app/", AuthSpaView.as_view(), name="tokenshare"),
+    path("app/dashboard", AuthSpaView.as_view(), name="tokenshare"),
     path('', NoAuthSpaView.as_view(), name='home'),
 ]

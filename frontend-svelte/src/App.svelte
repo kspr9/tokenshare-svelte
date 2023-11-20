@@ -9,14 +9,15 @@
     //import Navbar from "./components/Navbar.svelte";
     import Sidebar from "./components/Sidebar.svelte";
     import Profile from "./content/Profile.svelte";
-    import Dashboard from "./content/Dashboard.svelte";
-    import Workspaces from "./content/Workspaces.svelte";
+    import Dashboard from "./content/Workspaces.svelte";
+    import Workspaces from "./content/Dashboard.svelte";
     import Messages from "./content/Messages.svelte";
     import Settings from "./content/Settings.svelte";
     import NoSignInIndex from "./content/NoSignInIndex.svelte";
     //import AuthContent from "./components/AuthContent.svelte";
     //import MainLayout from "./layout/MainLayout.svelte";
     import Footer from "./components/Footer.svelte";
+    import Login from "./content/Login.svelte";
 
     // Type imports
     import type { UserProps } from './types/userProps';
@@ -39,7 +40,7 @@
         console.log("This is before the checkAuthentication function");
         console.log($isAuthenticated);
         console.log("Calling check-auth during onMount");
-
+        
         const checkedAuthData = await checkAuthentication();
         $isAuthenticated = checkedAuthData.isAuthenticated;
 
@@ -102,9 +103,9 @@
     
 </script>
 
-<Header />
 
 <Router>
+    <Header />
     <main class={$isAuthenticated ? "grid-main with-sidebar" : "grid-main no-sidebar"}>
 
         
@@ -128,6 +129,7 @@
             {/await}
         {:else}
             <Route path="" component={NoSignInIndex} />
+            <Route path="/login" component={Login} />
         {/if}
     
     </main>

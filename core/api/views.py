@@ -5,7 +5,8 @@ from rest_framework import authentication, permissions
 from rest_framework.renderers import JSONRenderer
 
 from rest_framework import status
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.views.decorators.csrf import csrf_exempt
 from .serializers import LoginSerializer
 
 from django.contrib.auth import get_user_model
@@ -35,7 +36,7 @@ class GreetingApi(APIView):
     def get(self, request, format=None):
         return Response({"message": "Hello world"})
 
-
+#@csrf_exempt
 class LoginAPIView(APIView):
     """
         Handles the HTTP POST request for logging in a user.
@@ -54,10 +55,18 @@ class LoginAPIView(APIView):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                return Response({'status': 'success', 'message': 'Login successful'})
+                is_authenticated = request.user.is_authenticated
+                return Response({'status': 'success', 'message': 'Login successful', 'is_authenticated': is_authenticated})
             else:
                 return Response({'status': 'error', 'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LogoutAPIView(APIView):
+    def post(self, request):
+        logout(request)
+        is_authenticated = request.user.is_authenticated
+        return Response({'status': 'success', 'message': 'Logged out successfully', 'is_authenticated': is_authenticated})
 
 
 class AuthUserApi(APIView):    

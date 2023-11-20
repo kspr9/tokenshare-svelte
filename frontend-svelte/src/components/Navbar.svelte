@@ -1,7 +1,6 @@
 <script lang="ts">
-    import { Router, Link, Route } from "svelte-routing";
+    import { Link } from "svelte-routing";
     import { isAuthenticated } from "../stores/isAuthenticatedStore";
-    
     let logoutUrl = `${window.location.origin}/accounts/logout`;
     
 
@@ -17,6 +16,7 @@
     <a href={logoutUrl}>Log Out</a>
   {:else}
     <!-- Items shown when the user is not signed in -->
+    <Link to="/login">Log In</Link>
     <a href="/accounts/login">Sign In</a>
     <a href="/signup">Register</a>
   {/if}
