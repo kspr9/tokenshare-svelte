@@ -21,7 +21,7 @@
 <div class="content-container">
     <!-- signed-in user content -->
     <h4>Hello {$userData?.username}!</h4>
-    <h3>Welcome to your dashboard.</h3>
+    <h1>Welcome to your dashboard.</h1>
     To manage your companies or create one, navigate to your Workspaces
     <br>
     <div class="card">

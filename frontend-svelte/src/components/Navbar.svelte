@@ -8,17 +8,16 @@
 
 <nav>
   <!-- Shared navigation items -->
-  <a href="/">Home</a>
-  <a href="/about">About</a>
-  <a href="/open-funding-calls">Open Funding Calls</a>
+  <Link to="">Home</Link>
+  <Link to="/about">About</Link>
+  <Link to="/open-funding-calls">Open Funding Calls</Link>
   {#if $isAuthenticated}
     <!-- Items shown when the user is signed in -->
     <a href={logoutUrl}>Log Out</a>
   {:else}
     <!-- Items shown when the user is not signed in -->
     <Link to="/login">Log In</Link>
-    <a href="/accounts/login">Sign In</a>
-    <a href="/signup">Register</a>
+    <Link to="/signup">Register</Link>
   {/if}
 </nav>
 

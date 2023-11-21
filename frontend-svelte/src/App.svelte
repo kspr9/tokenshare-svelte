@@ -9,8 +9,8 @@
     //import Navbar from "./components/Navbar.svelte";
     import Sidebar from "./components/Sidebar.svelte";
     import Profile from "./content/Profile.svelte";
-    import Dashboard from "./content/Workspaces.svelte";
-    import Workspaces from "./content/Dashboard.svelte";
+    import Dashboard from "./content/Dashboard.svelte";
+    import Workspaces from "./content/Workspaces.svelte";
     import Messages from "./content/Messages.svelte";
     import Settings from "./content/Settings.svelte";
     import NoSignInIndex from "./content/NoSignInIndex.svelte";
@@ -18,6 +18,7 @@
     //import MainLayout from "./layout/MainLayout.svelte";
     import Footer from "./components/Footer.svelte";
     import Login from "./content/Login.svelte";
+    import Register from "./content/Register.svelte";
 
     // Type imports
     import type { UserProps } from './types/userProps';
@@ -41,8 +42,9 @@
         console.log($isAuthenticated);
         console.log("Calling check-auth during onMount");
         
-        const checkedAuthData = await checkAuthentication();
-        $isAuthenticated = checkedAuthData.isAuthenticated;
+        // since Login.svelte already updates @isAuthenticated, this check here is not needed
+        //const checkedAuthData = await checkAuthentication();
+        //$isAuthenticated = checkedAuthData.isAuthenticated;
 
         console.log("Await check-auth completed during onMount");
         console.log("This is isAuthenticated state after the await checkAuthentication function");
@@ -99,7 +101,7 @@
         }
     }
 
-    //let promise = fetchAuthenticatedUser();
+
     
 </script>
 
@@ -117,6 +119,7 @@
                 <!-- Success state -->
                 <Sidebar />
                 <Route path="" component={Dashboard} />
+                <Route path="/app/dashboard" component={Dashboard} />
                 <Route path="/app/workspaces">
                     <Workspaces />
                 </Route>
@@ -130,6 +133,7 @@
         {:else}
             <Route path="" component={NoSignInIndex} />
             <Route path="/login" component={Login} />
+            <Route path="/signup" component={Register} />
         {/if}
     
     </main>
