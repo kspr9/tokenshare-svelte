@@ -19,6 +19,8 @@ from django.urls import path, include
 
 
 from core.tokenshare.views import AuthSpaView, NoAuthSpaView
+## Separate views into individual files, such as auth_user_views, governance_views etc
+## SPA views are alreadry done in tokenshare app
 from core.api.views import GreetingApi, LoginAPIView, AuthUserApi, check_authentication_status
 
 urlpatterns = [
@@ -30,4 +32,5 @@ urlpatterns = [
     path('api/login', LoginAPIView.as_view(), name='api_login'),
     path("app/dashboard", AuthSpaView.as_view(), name="tokenshare"),
     path('', NoAuthSpaView.as_view(), name='home'),
+    path('messages/', include('messages.urls')),
 ]

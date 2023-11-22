@@ -11,7 +11,7 @@ from .serializers import LoginSerializer
 
 from django.contrib.auth import get_user_model
 
-
+## TODO Separate views into individual files, such as auth_user_views, governance_views etc
 
 @api_view(['GET'])
 def check_authentication_status(request):
