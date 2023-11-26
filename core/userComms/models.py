@@ -1,9 +1,9 @@
 from django.db import models
 
-from accounts.models import User
+from core.accounts.models import User
 
 
-class Messsage(models.Model):
+class Message(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="messages")
     sender = models.ForeignKey(User, on_delete=models.PROTECT, related_name="messages_sent")
     recipients = models.ManyToManyField(User, related_name="messages_received")

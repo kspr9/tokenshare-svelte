@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import Message
-from accounts.models import User
+from core.accounts.models import User
 
 
 def inbox(request):
@@ -46,7 +46,7 @@ def compose(request):
             recipients.append(user)
         except User.DoesNotExist:
             return JsonResponse({
-                "error": f"User with email {email} does not exist."
+                "error": f"User with message {message} does not exist."
             }, status=400)
 
     # Get contents of email

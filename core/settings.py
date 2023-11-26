@@ -45,6 +45,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "core.tokenshare",
+    "core.accounts",
+    "core.governance",
+    "core.api",
+    "core.userComms",
 
 ]
 
@@ -89,6 +93,9 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+# Custom User model
+AUTH_USER_MODEL = 'accounts.User'
 
 
 # Password validation

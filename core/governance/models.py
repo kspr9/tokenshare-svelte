@@ -1,11 +1,13 @@
 from django.db import models
 
+from django.core.exceptions import ValidationError
+
 # for adding values to AuditTrail using signals
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
-from accounts.models import User
+from core.accounts.models import User
 
 
 
@@ -24,51 +26,103 @@ ROLE_CHOICES = (
         ('Basic', 'Basic'),
 )
 
-CONTRACT_CHOICES = (
-    ('Business', 'Business'),
-    ('Personal', 'Personal'),
-)
 
-# Base class for contract
+# Base class for governing shares of a company
 class GovernanceContract(models.Model):
-    contract_id = models.AutoField(primary_key=True)
-    contract_address = models.CharField(max_length=255, blank=True)
-    admin_address = models.CharField(max_length=255)
+    CONTRACT_CHOICES = (
+        ('Business', 'Business'),
+        ('Personal', 'Personal'),
+    )
     governance_type = models.CharField(max_length=255, choices=CONTRACT_CHOICES)
 
+    #contract_id = models.AutoField(primary_key=True)
+
+    # Contract address is added after the contract has been deployed
+    contract_address = models.CharField(max_length=255, blank=True)
+
+    # the tezos address of a User who creates the workspace
+    # from governed_company.admin_user.user_wallet_address
+    admin_address = models.CharField(max_length=255)
+
+    '''
+    attributes via other models:
+        'owned_company_shares' from CompanyShares model
+        'governed_company' from Company model
+        'governed_personal_company' from PersonalCompany model
+        'ws_governance_contract' from Workspace model
+    '''
+
+    def clean(self):
+        # Check if both relations exist
+        if hasattr(self, 'governed_company') and hasattr(self, 'governed_personal_company'):
+            raise ValidationError("A GovernanceContract can't be related to both a Company and a PersonalCompany.")
+        
+        super().clean()  # call the parent's clean method.
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # run the clean method and validate the model instance.
+        super().save(*args, **kwargs)
     
     def __str__(self):
-        return f'{self.contract_address=} admin by {self.admin_address}'
+        return f'{self.contract_address=} adminned by {self.admin_address}'
+
+
+class ProxyCompanyModel(models.Model):
+    # Governance Contract will be created after a company is created
+    # maybe handled by signals?
+    # maybe via view logic
+    # Once the associated Contract object is created, it will be assigned to this model
+
+    
+    # TODO: later, the admin user can be checked by the governance contract admin address
+    #       and user can be identified by which user commands the wallet address
+    # meaning that admin_user should eventually == owner of the admin_address of the governance contract
+    #admin_user = models.ForeignKey(User, 
+    #                               related_name='admin_in_companies', 
+    #                               on_delete=models.PROTECT)
+    
+    name = models.CharField(max_length=255)
+
+    class Meta:
+        abstract = True
 
 
 
 # Company Model
-class Company(models.Model):
-    company_id = models.AutoField(primary_key=True)
-    reg_number = models.PositiveIntegerField(unique=True)
-    company_name = models.CharField(max_length=255)
+class Company(ProxyCompanyModel):
+    reg_number = models.PositiveIntegerField()
     max_number_of_shares = models.PositiveIntegerField()
-    governance_contract = models.ForeignKey(GovernanceContract, 
+
+    # Each Company instance can be represented/governed by one contract
+    # does not represent 'owner' of a Company, rather 'a manager'
+        # If a governor company wants to 'own' shares, it is done
+        # by the governing contract owning CompanyShares
+    governing_contract = models.OneToOneField(GovernanceContract, 
                                          related_name='governed_company', 
                                          on_delete=models.PROTECT, 
                                          blank=True, null=True
                                          )
-    # TODO: later, the admin user can be checked by the governance contract admin address
-    #       and user can be identified by which user commands the wallet address
-    # meaning that admin_user should eventually == owner of the admin_address of the governance contract
-    admin_user = models.ForeignKey(User, 
-                                   related_name='admin_in_companies', 
-                                   on_delete=models.PROTECT)
+
+    ''' attributes via other models:
+        'asset_in_workspace' -from Workspace model
+            A company becomes an asset in a workspace, if
+            the governor contract of the WS owns shares in a company
+    '''
     
-    company_logo = models.ImageField(null=True, blank=True)
+    '''
     shares_held_in_other_companies = models.ManyToManyField('self', 
                                                            through='CompanyShares', 
-                                                           through_fields=('company_holder', 'company'),
+                                                           through_fields=('owner_contract', 'company'),
                                                            related_name='corporate_shareholder',
-                                                           symmetrical=False, # as this isn't a symmetrical relation
+                                                           symmetrical=False, 
                                                            blank=True)
     
     
+    # This property fetches all CompanyShares where the governing contract is this Company's governance contract
+    @property
+    def shares_owned(self):
+        return CompanyShares.objects.filter(governing_contract=self.governance_contract)
+    '''
     # custom behaviour for when a company is deleted
     # NOTE! If the model instances are deleted in bulk using the QuerySet’s delete method, 
     # the custom delete method will not be called.
@@ -81,37 +135,53 @@ class Company(models.Model):
         super().delete(*args, **kwargs)
     
     def __str__(self):
-        return f'{self.company_name=} ({self.reg_number=})'
+        return f'{self.name=} ({self.reg_number=})'
 
+
+# Abstraction model for handling governance, shares ownership 
+# and workspaces for Users the same way as for Companies
+# The user itself does not have a relation to governance contract, 
+# instead they have a relation to this proxy model which inturn has
+# a relation to the governance contract
+class PersonalCompany(ProxyCompanyModel):
+    governing_contract = models.OneToOneField(GovernanceContract, 
+                                         related_name='governed_personal_company', 
+                                         on_delete=models.PROTECT, 
+                                         blank=True, null=True
+                                        )
 
 
 # Share Model (Intermediary for ManyToMany)
 class CompanyShares(models.Model):
-    company = models.ForeignKey(Company, 
-                                related_name='company_shares', 
+    # which company issued these shares
+    issuing_company = models.ForeignKey(Company, 
+                                related_name='shares_issued', 
                                 on_delete=models.PROTECT)
+    # amount of shares that are combined into one Shares instance
+    shares_amount = models.PositiveIntegerField()
+    share_type = models.CharField(max_length=10, choices=SHARE_CHOICES)
+    date_issued = models.DateTimeField(auto_now_add=True)
     
     ## Should CompanyShares have, instead of 'holder', a governing contract?
     ## the idea is that the app should not care about to which user the shares belong to
     ## it only cares about which contract governs the shares.
     ## if you have access to the contract, then you are the one who owns, 
     # and thus can govern
+
     # NOTE: for the purpose of keeping data synced, the transfer of shares should be
     #   --> performed through the portal involving a signature of the portal's main contract
     #   this way we can ensure the changes are reflected in the portal DB as well, and 
     #   transfers cannot happen merely by executing transactions on the blockchain
+    ''' Represents the Owner of a Share '''
     governing_contract = models.ForeignKey(GovernanceContract, 
-                                          related_name='governed_company_shares', 
-                                          on_delete=models.PROTECT, 
-                                          blank=True, null=True
+                                           related_name='owned_company_shares',
+                                           on_delete=models.PROTECT, 
+                                           blank=True, null=True
                                           )
 
-    
-    shares_amount = models.PositiveIntegerField()
-    share_type = models.CharField(max_length=10, choices=SHARE_CHOICES)
-    date_acquired = models.DateField()
-    vesting_start_date = models.DateField(null=True, blank=True)
-    vesting_period = models.DurationField(null=True, blank=True)
+    date_last_ownership_change = models.DateField(blank=True)
+    vesting_start_date = models.DateField(blank=True)
+    vesting_period = models.DurationField(blank=True)
 
     
     @property
@@ -126,7 +196,7 @@ class CompanyShares(models.Model):
 
 # Workspace Model
 class Workspace(models.Model):
-    workspace_id = models.AutoField(primary_key=True)
+    #workspace_id = models.AutoField(primary_key=True)
     workspace_name = models.CharField(max_length=255)
     workspace_description = models.TextField(blank=True)
     workspace_logo = models.ImageField(null=True, blank=True)
@@ -147,7 +217,7 @@ class Workspace(models.Model):
         and then it does not matter which is the manager of the governance contract
     '''
     ws_governor_contract = models.ForeignKey(GovernanceContract, 
-                                         related_name='ws_governance_contract', 
+                                         related_name='governed_workspace', 
                                          blank=True, null=True, 
                                          on_delete=models.PROTECT)
     
@@ -155,16 +225,18 @@ class Workspace(models.Model):
     workspace_assets = models.ManyToManyField(Company, 
                                               related_name='asset_in_workspace', 
                                               blank=True)
+    # might be redundant, since permission to perform actions in 
+    # the governor company of the workspace, would be managed by CompanyRoles
     workspace_members = models.ManyToManyField(User, 
                                                related_name='member_in_workspaces', 
                                                blank=True)
 
 
     def __str__(self):
-        return f"Workspace {self.workspace_name} is governed by contract: {self.governing_contract.contract_address}"
+        return f"Workspace {self.workspace_name} is governed by contract: {self.ws_governor_contract.contract_address}"
     
         
-# Role Model
+# Role Model - giving role based privileges or responsibility in a company
 class CompanyRoles(models.Model):
     user = models.ForeignKey(User, related_name='roles_in_company', on_delete=models.CASCADE)
     company = models.ForeignKey(Company,related_name='company_roles', on_delete=models.CASCADE)
@@ -174,7 +246,7 @@ class CompanyRoles(models.Model):
         unique_together = ('user', 'company', 'role_type')
     
     def __str__(self):
-        return f"{self.user.username} has a {self.get_role_type_display()} role in {self.company.company_name}"
+        return f"{self.user.username} has a {self.get_role_type_display()} role in {self.company.name}"
 
 # Events model
 class TimelineEvent(models.Model):
@@ -204,6 +276,7 @@ class TimelineEvent(models.Model):
 
     # References to other models
     company = models.ForeignKey(Company, related_name='company_events', on_delete=models.CASCADE)
+    workspace = models.ForeignKey(Workspace, related_name='workspace_events', on_delete=models.CASCADE)
 
 
 # AuditTrail Model

@@ -23,6 +23,7 @@ from core.tokenshare.views import AuthSpaView, NoAuthSpaView
 ## SPA views are alreadry done in tokenshare app
 from core.api.views import GreetingApi, LoginAPIView, AuthUserApi, check_authentication_status
 
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),
@@ -32,5 +33,5 @@ urlpatterns = [
     path('api/login', LoginAPIView.as_view(), name='api_login'),
     path("app/dashboard", AuthSpaView.as_view(), name="tokenshare"),
     path('', NoAuthSpaView.as_view(), name='home'),
-    path('messages/', include('messages.urls')),
+    path('messages/', include('core.userComms.urls')),
 ]
