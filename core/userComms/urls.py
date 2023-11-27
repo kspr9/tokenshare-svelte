@@ -2,7 +2,7 @@ from django.urls import path
 
 from . import views
 
-app_name="mail"
+app_name="userComms"
 
 urlpatterns = [
     path("", views.inbox, name="inbox"),
@@ -13,5 +13,5 @@ urlpatterns = [
     # API Routes
     path("send_msg", views.compose, name="compose"),
     path("messages/<int:msg_id>", views.message, name="message"),
-    path("messages/<str:mailbox>", views.mailbox, name="mailbox"),
+    path("message_hub/<str:mailbox>", views.mailbox, name="mailbox"),
 ]

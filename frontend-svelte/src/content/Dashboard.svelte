@@ -1,5 +1,5 @@
 <script lang="ts">
-    console.log("AuthContent component is being initialized");
+    console.log("Dashboard component is being initialized");
     import { onMount } from "svelte";
     import { userData } from "../stores/userDataStore";
     

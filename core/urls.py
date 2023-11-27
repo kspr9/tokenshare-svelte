@@ -33,5 +33,5 @@ urlpatterns = [
     path('api/login', LoginAPIView.as_view(), name='api_login'),
     path("app/dashboard", AuthSpaView.as_view(), name="tokenshare"),
     path('', NoAuthSpaView.as_view(), name='home'),
-    path('messages/', include('core.userComms.urls')),
+    path('user_comms/', include('core.userComms.urls')),
 ]

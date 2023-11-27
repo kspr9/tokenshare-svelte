@@ -1,50 +1,57 @@
 <script lang="ts">
 
+    import { userData } from "../stores/userDataStore";
+
+    export let onMessageSent: (view: string) => void;
+
+    let recipients = '';
+    let subject = '';
+    let body = '';
+    let username = $userData?.username;
+
+
     // SendEmail
-    async function send_email(event) {
-
-        // Modifies the default beheavor so it doesn't reload the page after submitting.
-        event.preventDefault();
-
-        // define the variables taken from compose form field IDs
-        const recipients = document.querySelector("#compose-recipients").value;
-        const subject = document.querySelector("#compose-subject").value;
-        const body = document.querySelector("#compose-body").value;
-
-        const sending = await fetch('/mail/emails', {
+    async function sendMessage() {
+        const sending = await fetch('/user_comms/send_msg', {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({
                 recipients: recipients,
                 subject: subject,
                 body: body
-                
             })
         })
         .then(response => response.json())
         .then(result => {
             console.log({result});
+        })
+        .then(() => {
+            onMessageSent('sent');
+        })
+        .catch(error => {
+            console.error('Error:', error);
         });
-
-        const unreading = await fetch("/mail/emails/sent")
-            .then((response) => response.json()) // response is the data received from fetch
-            .then((emails) => {
-                console.log({emails});
-
-                const email_id = Math.max(...emails.map(item => item.id));
-                console.log({email_id});
-                changeToUnread(email_id);
-        });
-
-        loadMailbox("sent");
 
     }
 </script>
 
 <h2>Compose your message</h2>
 
-<form on:submit|preventDefault={sendMessage}>
-    <input id="compose-recipients" bind:value={recipients} class="form-control" placeholder="Recipients">
-    <input id="compose-subject" bind:value={subject} class="form-control" placeholder="Subject">
-    <textarea id="compose-body" bind:value={body} class="form-control" placeholder="Message"></textarea>
-    <button type="submit">Send Message</button>
-</form>
+<div id="compose-view">
+    <h3>New Message</h3>
+    <form id="compose-form" on:submit|preventDefault={sendMessage}>
+        <div class="form-group">
+            From: <input disabled class="form-control" bind:value={username}>
+        </div>
+        <div class="form-group">
+            To: <input bind:value={recipients} class="form-control" placeholder="Recipients">
+        </div>
+        <div class="form-group">
+            <input bind:value={subject} class="form-control" placeholder="Subject">
+        </div>
+        <textarea bind:value={body} class="form-control" placeholder="Your Message Here"></textarea>
+        <input type="submit" class="btn btn-primary" value="Send" id="send-email" disabled={!$userData || !$userData.username}/>
+    </form>
+</div>

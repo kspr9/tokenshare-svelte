@@ -10,11 +10,16 @@
     <div class="msg-content">
         
         <slot name="pre_description"/>
-        <slot name="recipients"/>
+        {#if $$slots.sender}
+            <slot name="sender"/>
+        {/if}
+        {#if $$slots.recipients}
+            <slot name="recipients"/>
+        {/if}
     
         <slot name="subject"/>
     
-        <slot name="timestamp"/>
+        <slot name="timestamp" class="date"/>
         
     </div>
 </div>

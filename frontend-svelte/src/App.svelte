@@ -29,31 +29,35 @@
     
 
     let apimessage = "waiting for server...";
-    
-    let userProps: UserProps;
-    
-    
+     
 
     console.log("This is before the onMount");
     console.log($isAuthenticated);
     console.log("--------------");
     onMount(async () => {
-        console.log("This is before the checkAuthentication function");
-        console.log($isAuthenticated);
-        console.log("Calling check-auth during onMount");
+                        
+        // since Login.svelte already updates $isAuthenticated, this check here is not needed
+        const checkedAuthData = await checkAuthentication()
+        .then(res => {
+            isAuthenticated.set(res.isAuthenticated);
+            console.log("inside onMount, after checkAuthentication .then");
+            console.log($isAuthenticated);
+        })
         
-        // since Login.svelte already updates @isAuthenticated, this check here is not needed
-        //const checkedAuthData = await checkAuthentication();
-        //$isAuthenticated = checkedAuthData.isAuthenticated;
 
-        console.log("Await check-auth completed during onMount");
-        console.log("This is isAuthenticated state after the await checkAuthentication function");
+        console.log("This is isAuthenticated state inside onMount, before fetchUserProps");
         console.log($isAuthenticated);
 
         if ($isAuthenticated) {
             console.log("This should run ONLY when the user is authenticated");
-            const fetchedUserProps = await fetchUserProps();
-            $userData = fetchedUserProps;
+            const fetchedUserProps = await fetchUserProps()
+            .then(userProps => {
+                userData.set(userProps);
+            })
+            .then(() => {
+                console.log("userData store updated");
+                console.log($userData);
+            })
         }
     });
 
@@ -93,7 +97,7 @@
                 last_name: data.userData.last_name
             };
             console.log(userProps.username);
-
+            //userData.set(userProps);
             return userProps;
         } catch (error) {
             console.error('Unauthenticated user session:', error);
@@ -112,7 +116,7 @@
 
         
         {#if $isAuthenticated}
-            {#await fetchUserProps()}
+            {#await userData}
                 <!-- Loading state -->
                 <p>Loading user data...</p>
             {:then}

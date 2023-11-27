@@ -17,25 +17,24 @@
     async function login() {
       try {
         const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-        },
-          body: JSON.stringify({ username, password })
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ username, password })
         });
+        
+        const data = await response.json();
 
         if (!response.ok) {
-            const errorData = await response.json();
-            errorMessage = errorData.message;
+            errorMessage = data.message;
+            throw new Error(errorMessage);
         };
 
-        const data = await response.json();
-        // Save the token, update the app state, etc.
-        $isAuthenticated = data.is_authenticated;
+        // Update the isAuthenticated state.
+        isAuthenticated.set(data.is_authenticated);
         navigate("/app/dashboard", { replace: true });
-
-        return {isAuthenticated, "message": "Login successful"};
 
       } catch (error) {
         console.error('Login unsuccessful in catch:', error);
