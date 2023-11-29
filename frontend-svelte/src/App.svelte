@@ -3,6 +3,7 @@
     import { Router, Route } from "svelte-routing";
     import { onMount } from "svelte";
 
+
     // Component imports
     ////////////////////
     import Header from "./components/Header.svelte";
@@ -37,46 +38,84 @@
     onMount(async () => {
                         
         // since Login.svelte already updates $isAuthenticated, this check here is not needed
-        const checkedAuthData = await checkAuthentication()
+        checkAuthentication()
         .then(res => {
             isAuthenticated.set(res.isAuthenticated);
             console.log("inside onMount, after checkAuthentication .then");
             console.log($isAuthenticated);
         })
-        
+    
+    });
 
-        console.log("This is isAuthenticated state inside onMount, before fetchUserProps");
-        console.log($isAuthenticated);
-
-        if ($isAuthenticated) {
-            console.log("This should run ONLY when the user is authenticated");
-            const fetchedUserProps = await fetchUserProps()
+    let userDataAvailable: boolean = false;
+    
+    isAuthenticated.subscribe(value => {
+        if (value) {
+            fetchUserProps()
             .then(userProps => {
                 userData.set(userProps);
+                userDataAvailable = true;
             })
             .then(() => {
                 console.log("userData store updated");
                 console.log($userData);
             })
+            .catch(error => {
+                console.error("Error fetching user data:", error);
+                // Handle the error appropriately
+            });
         }
-    });
+    })
+    /*
+    
+    $: if ($isAuthenticated) {
+        fetchUserProps()
+        .then(userProps => {
+            userData.set(userProps);
+        })
+        .then(() => {
+            console.log("userData store updated");
+            console.log($userData);
+        })
+        .catch(error => {
+            console.error("Error fetching user data:", error);
+            // Handle the error appropriately
+        });
+    }
+    
+    */
 
     // Function to check authentication
     async function checkAuthentication() {
-        console.log("Fetching check-auth data");
-        let res = await fetch('/api/check-auth/');
-        let data = await res.json();
-        console.log("Got the check-auth data from server");
-        let isAuthenticated: boolean = data.is_authenticated;
-        let authMessage:string = "";
-        if (isAuthenticated) {
-            authMessage += "User is authenticated. ";
-            authMessage += "Auth check performed successfully. ";
-        } else {
-            authMessage += "User is not authenticated";
-            authMessage += "Auth check performed successfully. ";
-        };
-        return {isAuthenticated, "message": authMessage};
+        try {
+            console.log("Fetching check-auth data");
+            let res = await fetch('/api/check-auth/');
+
+            // Check if the fetch request was successful
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+
+            let data = await res.json();
+            console.log("Got the check-auth data from server");
+
+            let isAuthenticated = data.is_authenticated;
+            let authMessage = "";
+
+            if (isAuthenticated) {
+                authMessage += "User is authenticated. ";
+                authMessage += "Auth check performed successfully. ";
+            } else {
+                authMessage += "User is not authenticated. ";
+                authMessage += "Auth check performed successfully. ";
+            };
+
+            return { isAuthenticated, "message": authMessage };
+        } catch (error) {
+            // Handle any errors that occurred during fetch or JSON parsing
+            console.error("Error in authentication check:", error);
+            return { isAuthenticated: false, message: "Failed to perform auth check due to an error." };
+        }
     }
 
     // Function to fetch authenticated user data
@@ -116,7 +155,7 @@
 
         
         {#if $isAuthenticated}
-            {#await userData}
+            {#await userDataAvailable}
                 <!-- Loading state -->
                 <p>Loading user data...</p>
             {:then}
