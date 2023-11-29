@@ -1,8 +1,17 @@
 <script lang="ts">
     import { Link } from "svelte-routing";
     import { isAuthenticated } from "../stores/isAuthenticatedStore";
+    
+    import { isLoginModalOpen } from "../stores/isLoginModalOpenStore";
+
     let logoutUrl = `${window.location.origin}/accounts/logout`;
     
+    function openLoginModal() {
+        console.log('open login modal');
+        console.log($isLoginModalOpen);
+        isLoginModalOpen.set(true);
+        console.log($isLoginModalOpen);
+    }
 
 </script>
 
@@ -16,7 +25,9 @@
     <a href={logoutUrl}>Log Out</a>
   {:else}
     <!-- Items shown when the user is not signed in -->
-    <Link to="/login">Log In</Link>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <span on:click={openLoginModal} class="link-style">Log In</span>
     <Link to="/signup">Register</Link>
   {/if}
 </nav>
@@ -30,4 +41,5 @@
         width: 100%;
         margin-top: 1.25em;
     }
+    
 </style>

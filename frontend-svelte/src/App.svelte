@@ -27,6 +27,7 @@
     // Store imports
     import { isAuthenticated } from "./stores/isAuthenticatedStore";
     import { userData } from "./stores/userDataStore";
+    import { isLoginModalOpen } from "./stores/isLoginModalOpenStore";
     
 
     let apimessage = "waiting for server...";
@@ -175,7 +176,9 @@
             {/await}
         {:else}
             <Route path="" component={NoSignInIndex} />
-            <Route path="/login" component={Login} />
+            {#if $isLoginModalOpen}
+                <Login />
+            {/if}
             <Route path="/signup" component={Register} />
         {/if}
     

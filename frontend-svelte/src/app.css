@@ -14,20 +14,23 @@
   -webkit-text-size-adjust: 100%;
 }
 
-a {
+a, .link-style {
   font-weight: 500;
   color: #646cff;
   text-decoration: inherit;
 }
-a:hover {
+a:hover, .link-style:hover {
   color: #535bf2;
+}
+
+.link-style {
+  cursor: pointer;
 }
 
 body {
   margin: 0;
   padding: 0;
-  width: 90%;
-  height: 100%;
+  width: auto;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -42,7 +45,7 @@ h1 {
 }
 
 #app {
-  max-height: 100vh;
+  height: 100vh;
   margin: 0 auto;
   padding: 0rem;
   text-align: center;
