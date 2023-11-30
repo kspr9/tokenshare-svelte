@@ -12,9 +12,19 @@
     <link rel='stylesheet' href="{% static 'frontend/global.css' %}"> 
     
     
-    <script defer src="{% static 'frontend/bundle.js' %}"></script>
+    
   </head>
   <body>
+  
     <div id="app"></div>
+
+    {% if DEBUG %}
+    <!-- Vite's development server -->
+    <script type="module" src="http://localhost:5173/@vite/client"></script>
+    <script type="module" src="http://localhost:5173/src/main.ts"></script>
+    {% else %}
+    <!-- Production bundle -->
+    <script defer src="{% static 'frontend/bundle.js' %}"></script>
+    {% endif %}
   </body>
 </html>

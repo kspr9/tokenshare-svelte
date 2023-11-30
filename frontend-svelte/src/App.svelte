@@ -40,7 +40,8 @@
     onMount(async () => {
                         
         // since Login.svelte already updates $isAuthenticated, this check here is not needed
-        mockCheckAuthentication()
+        //mockCheckAuthentication()
+        checkAuthentication()
         .then(res => {
             isAuthenticated.set(res.isAuthenticated);
             console.log("inside onMount, after checkAuthentication .then");
@@ -55,7 +56,8 @@
         if (value) {
             // TODO: change this function to fetchUserProps()
             // below function is intended for development
-            mockFetchUserProps()
+            //mockFetchUserProps()
+            fetchUserProps()
             .then(userProps => {
                 userData.set(userProps);
                 userDataAvailable = true;
