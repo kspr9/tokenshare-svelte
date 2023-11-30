@@ -32,6 +32,7 @@
 
     let apimessage = "waiting for server...";
      
+    
 
     console.log("This is before the onMount");
     console.log($isAuthenticated);
@@ -39,7 +40,7 @@
     onMount(async () => {
                         
         // since Login.svelte already updates $isAuthenticated, this check here is not needed
-        checkAuthentication()
+        mockCheckAuthentication()
         .then(res => {
             isAuthenticated.set(res.isAuthenticated);
             console.log("inside onMount, after checkAuthentication .then");
@@ -52,7 +53,9 @@
     
     isAuthenticated.subscribe(value => {
         if (value) {
-            fetchUserProps()
+            // TODO: change this function to fetchUserProps()
+            // below function is intended for development
+            mockFetchUserProps()
             .then(userProps => {
                 userData.set(userProps);
                 userDataAvailable = true;
@@ -143,6 +146,39 @@
             console.error('Unauthenticated user session:', error);
             throw error; // Re-throw the error to handle it in the calling context
         }
+    }
+
+    async function mockCheckAuthentication() {
+        console.log("Fetching check-auth data");
+            
+        console.log("Got the check-auth data from server");
+
+        let isAuthenticated = true;
+        let authMessage = "";
+
+        if (isAuthenticated) {
+            authMessage += "User is authenticated. ";
+            authMessage += "Auth check performed successfully. ";
+        } else {
+            authMessage += "User is not authenticated. ";
+            authMessage += "Auth check performed successfully. ";
+        };
+
+        return { isAuthenticated, "message": authMessage };
+    }
+
+    // Function to fetch authenticated user data
+    async function mockFetchUserProps() {
+        const userProps = {
+                pk: 1,
+                username: 'kspr',
+                email: 'kspr9@pm.me',
+                first_name: 'Kaspar',
+                last_name: 'Pae'
+        };
+        console.log(userProps.username);
+        
+        return userProps;
     }
 
 
