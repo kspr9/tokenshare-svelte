@@ -72,24 +72,7 @@
             });
         }
     })
-    /*
     
-    $: if ($isAuthenticated) {
-        fetchUserProps()
-        .then(userProps => {
-            userData.set(userProps);
-        })
-        .then(() => {
-            console.log("userData store updated");
-            console.log($userData);
-        })
-        .catch(error => {
-            console.error("Error fetching user data:", error);
-            // Handle the error appropriately
-        });
-    }
-    
-    */
 
     // Function to check authentication
     async function checkAuthentication() {
@@ -150,6 +133,8 @@
         }
     }
 
+    /*
+    
     async function mockCheckAuthentication() {
         console.log("Fetching check-auth data");
             
@@ -182,6 +167,7 @@
         
         return userProps;
     }
+    */
 
 
     

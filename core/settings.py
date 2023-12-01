@@ -32,7 +32,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 DEBUG = int(os.environ.get('DEBUG', default=1))
 #DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -209,5 +209,3 @@ LOGGING = {
         },
     },
 }
-
-print(DEBUG)

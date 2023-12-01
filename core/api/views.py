@@ -7,7 +7,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
-from .serializers import LoginSerializer
+from .serializers import LoginSerializer, RegisterSerializer
 
 from django.contrib.auth import get_user_model
 
@@ -68,6 +68,36 @@ class LogoutAPIView(APIView):
         is_authenticated = request.user.is_authenticated
         return Response({'status': 'success', 'message': 'Logged out successfully', 'is_authenticated': is_authenticated})
 
+
+class RegisterAPIView(APIView):
+    '''
+    APIView for registering a new user.
+    Using RegisterSerializer to validate and create the new user.
+    '''
+    '''
+    Preferred this APIView, instead of generics.CreateAPIView because later want to add custom logic.
+    
+    Some examples where we might use custom logic in our Django Rest Framework views:
+        --> Email Verification: After a user registers, you might want to send a verification email. In the custom view, you can add logic to generate a verification token and send an email with a verification link.
+        --> Wallets/Contracts? --> Third-Party Integrations: Suppose your user registration needs to interact with external services, like a payment gateway or a CRM system. You could add the logic to create a corresponding customer record in those systems after the user is created in your database.
+        --> Deploying Contract, creating Wallets, etc -->  Integration with Background Tasks: For operations that don't need to be completed immediately (like sending welcome emails or processing data for new users), you might enqueue these tasks as background jobs to improve API response times.
+        Custom User Logging or Analytics: For detailed logging (e.g., who is registering, when, and from where), you might want to add custom logging logic to record this information either in your database or in an external analytics service.
+        Role or Permission Assignment: If your application has complex role-based access control, you might need to assign roles or permissions to the user upon registration, possibly based on the information they provide during signup.
+        Complex Validation Logic: While serializers handle basic validation, you might have more complex validation rules that depend on multiple fields or external factors. For example, checking if the user's age is appropriate based on their country's legal requirements.
+        Custom Response Data: You might want to return a custom response structure that includes additional data beyond what the serializer provides, such as tokens for API access, links to user guides, or personalized welcome messages.
+        Rate Limiting or Anti-Spam Measures: Implement custom checks to prevent abuse of the registration endpoint, such as limiting the number of accounts created from the same IP address in a short period.
+        Data Transformation: In some cases, you might need to transform request data before it's serialized or transform serialized data before it's returned in the response.
+        Custom Authentication or Token Generation: You might need to implement a custom authentication mechanism or token generation logic as part of the registration process, especially if your application uses a non-standard way of handling user sessions or security tokens.
+    '''
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "message": "User registered successfully!",
+                "data": serializer.data
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class AuthUserApi(APIView):    
     """

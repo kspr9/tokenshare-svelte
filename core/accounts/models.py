@@ -13,7 +13,9 @@ class TimeStampedModel(models.Model):
     class Meta:
         abstract = True
 '''
-
+class NullableUniqueCharField(models.CharField):
+    def get_prep_value(self, value):
+        return value if value != '' else None
 
 # Custom User Model
 class User(AbstractUser):
@@ -29,7 +31,7 @@ class User(AbstractUser):
         date_joined
     """
     #user_id = models.AutoField(primary_key=True)
-    user_wallet_address = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    user_wallet_address = NullableUniqueCharField(max_length=255, unique=True, null=True, blank=True)
     ''' To get all shares owned by the User
         we can get GovernanceContracts that the User wallet admins
         ie self.user_wallet_address == GovernanceContract.admin_address
