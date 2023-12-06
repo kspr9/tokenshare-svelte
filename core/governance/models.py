@@ -11,20 +11,9 @@ from core.accounts.models import User
 
 
 
-SHARE_CHOICES = (
-		('A', 'class A'),
-		('B', 'class B'),
-		('C', 'class C'),
-)
 
-ROLE_CHOICES = (
-        ('CEO', 'CEO'),
-        ('Secretary', 'Secretary'),
-		('Guest', 'Guest'),
-		('Shareholder', 'Shareholder'),
-        ('Employee', 'Employee'),
-        ('Basic', 'Basic'),
-)
+
+
 
 
 # Base class for governing shares of a company
@@ -153,6 +142,11 @@ class PersonalCompany(ProxyCompanyModel):
 
 # Share Model (Intermediary for ManyToMany)
 class CompanyShares(models.Model):
+    SHARE_CHOICES = (
+		('A', 'class A'),
+		('B', 'class B'),
+		('C', 'class C'),
+    )
     # which company issued these shares
     issuing_company = models.ForeignKey(Company, 
                                 related_name='shares_issued', 
@@ -216,15 +210,16 @@ class Workspace(models.Model):
         So to make it simpler, ws_governor should be a GovernanceContract, 
         and then it does not matter which is the manager of the governance contract
     '''
-    ws_governor_contract = models.ForeignKey(GovernanceContract, 
+    ws_governor_contract = models.OneToOneField(GovernanceContract, 
                                          related_name='governed_workspace', 
                                          blank=True, null=True, 
                                          on_delete=models.PROTECT)
     
-
-    workspace_assets = models.ManyToManyField(Company, 
-                                              related_name='asset_in_workspace', 
-                                              blank=True)
+    # TODO: This might be redundant, as assets can be loaded via 
+    #   the ws_governor_contract.owned_company_shares.issuing_company.get_unique etc
+    #workspace_assets = models.ManyToManyField(Company, 
+    #                                          related_name='asset_in_workspace', 
+    #                                          blank=True)
     # might be redundant, since permission to perform actions in 
     # the governor company of the workspace, would be managed by CompanyRoles
     workspace_members = models.ManyToManyField(User, 
@@ -238,6 +233,16 @@ class Workspace(models.Model):
         
 # Role Model - giving role based privileges or responsibility in a company
 class CompanyRoles(models.Model):
+    
+    ROLE_CHOICES = (
+        ('CEO', 'CEO'),
+        ('Secretary', 'Secretary'),
+		('Guest', 'Guest'),
+		('Shareholder', 'Shareholder'),
+        ('Employee', 'Employee'),
+        ('Basic', 'Basic'),
+    )
+
     user = models.ForeignKey(User, related_name='roles_in_company', on_delete=models.CASCADE)
     company = models.ForeignKey(Company,related_name='company_roles', on_delete=models.CASCADE)
     role_type = models.CharField(max_length=50, choices=ROLE_CHOICES)

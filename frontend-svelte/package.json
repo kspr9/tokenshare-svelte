@@ -19,6 +19,10 @@
     "vite": "^4.4.5"
   },
   "dependencies": {
+    "@svelteuidev/composables": "^0.15.3",
+    "@svelteuidev/core": "^0.15.3",
+    "@svelteuidev/dates": "^0.15.3",
+    "dayjs": "^1.11.10",
     "svelte-routing": "^2.6.0"
   }
 }
