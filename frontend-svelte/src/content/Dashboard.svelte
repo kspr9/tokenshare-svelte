@@ -21,13 +21,16 @@
 <div class="content-container">
     <!-- signed-in user content -->
     <h4>Hello {$userData?.username}!</h4>
-    <h1>Welcome to your dashboard.</h1>
+    <h3>Welcome to your dashboard.</h3>
     To manage your companies or create one, navigate to your Workspaces
+    <br>
+    <br>
+    <h2>Timeline Events below</h2>
+    <p>Recent timeline events across all your workspaces</p>
     <br>
     <div class="card">
         <Counter />
     </div>
-    
 
     <h3>Data from server</h3>
     {apimessage}
