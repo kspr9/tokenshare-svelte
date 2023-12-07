@@ -4,6 +4,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import EmailValidator
 
+from core.governance.models import Company, GovernanceContract, PersonalCompany, Workspace
+
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
@@ -55,3 +57,47 @@ class RegisterSerializer(serializers.ModelSerializer):
             Company model has governance_contract
             GovernanceContract has 'owned_company_shares' through CompanyShares model
     '''
+
+class WorkspaceCompanyContractSerializer(serializers.ModelSerializer):
+    pass
+
+class RegisterWorkspaceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Workspace
+        fields = ('workspace_name', 'workspace_description', 'workspace_logo')
+
+
+class RegisterCompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ('name', 'reg_number', 'max_number_of_shares')
+
+class RegisterPersonalCompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PersonalCompany
+        fields = ('name')
+
+
+
+
+
+class GovernanceContractSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GovernanceContract
+        fields = ('contract_address', 'admin_address', 'governance_type')
+
+class WorkspaceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Workspace
+        fields = ('workspace_name', 'workspace_description', 'workspace_logo' ,'workspace_owner', 'ws_governor_contract')
+
+class CompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ('name', 'reg_number', 'max_number_of_shares')
+
+class PersonalCompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PersonalCompany
+        fields = ('name')
+

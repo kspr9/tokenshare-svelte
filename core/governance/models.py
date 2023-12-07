@@ -56,6 +56,7 @@ class GovernanceContract(models.Model):
         return f'{self.contract_address=} adminned by {self.admin_address}'
 
 
+'''
 class ProxyCompanyModel(models.Model):
     # Governance Contract will be created after a company is created
     # maybe handled by signals?
@@ -74,16 +75,18 @@ class ProxyCompanyModel(models.Model):
 
     class Meta:
         abstract = True
+'''
 
 
 
 # Company Model
-class Company(ProxyCompanyModel):
+class Company(models.Model):
+    name = models.CharField(max_length=255)
     reg_number = models.PositiveIntegerField()
     max_number_of_shares = models.PositiveIntegerField()
 
     # Each Company instance can be represented/governed by one contract
-    # does not represent 'owner' of a Company, rather 'a manager'
+    # does not represent 'owner' of a Company, rather 'a manager' or a 'governance space'
         # If a governor company wants to 'own' shares, it is done
         # by the governing contract owning CompanyShares
     governing_contract = models.OneToOneField(GovernanceContract, 
@@ -129,10 +132,10 @@ class Company(ProxyCompanyModel):
 
 # Abstraction model for handling governance, shares ownership 
 # and workspaces for Users the same way as for Companies
-# The user itself does not have a relation to governance contract, 
-# instead they have a relation to this proxy model which inturn has
-# a relation to the governance contract
-class PersonalCompany(ProxyCompanyModel):
+# The users relation to a company is through the wallet_address that is tied to a Governance contract
+# the governance contract, in turn, has the relation to a Company model
+class PersonalCompany(models.Model):
+    name = models.CharField(max_length=255)
     governing_contract = models.OneToOneField(GovernanceContract, 
                                          related_name='governed_personal_company', 
                                          on_delete=models.PROTECT, 
