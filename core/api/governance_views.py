@@ -67,6 +67,9 @@ class CompanyViewSet(viewsets.ModelViewSet):
             return Company.objects.filter(governing_contract__admin_address=wallet_address)
         return Company.objects.none()
 
+
+
+
 class GovernanceContractViewSet(viewsets.ModelViewSet):
     queryset = GovernanceContract.objects.all()
     serializer_class = GovernanceContractSerializer

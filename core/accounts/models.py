@@ -37,10 +37,9 @@ class User(AbstractUser):
         ie self.user_wallet_address == GovernanceContract.admin_address
             contracts = GovernanceContract.objects.filter(admin_address=self.user_wallet_address)
         and get all the shares 'owned_company_shares' from that contract
-        OR through the self.admin_in_companies, Company.governance_contract,
-        assuming admin_user.user_wallet_address in the Company always == contract.admin_address
+
     '''
-    roles_in_companies = models.ManyToManyField('governance.Company', through='governance.CompanyRoles', related_name='users_with_roles', blank=True)
+    #roles_in_companies = models.ManyToManyField('governance.Company', through='governance.CompanyRoles', related_name='users_with_roles', blank=True)
 
     '''
     attributes via other models:
@@ -49,6 +48,7 @@ class User(AbstractUser):
             GovernanceContract has 'owned_company_shares' through CompanyShares model
         'owned_workspace' from Workspace model
         'member_in_workspaces' from Workspace model
+        'roles_in_company' from CompanyRoles model
     '''
 
     # storing the users wallet in the existing audit trails, but allowing to delete the user

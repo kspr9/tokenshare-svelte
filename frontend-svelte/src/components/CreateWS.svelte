@@ -30,7 +30,7 @@
         const response = await createWorkspace(formData);
         responseMessage = response.message;
       } catch (error) {
-        errorMessage = error.message;
+        
       }
     };
   </script>

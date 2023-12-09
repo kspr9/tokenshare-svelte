@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import EmailValidator
 
-from core.governance.models import Company, GovernanceContract, PersonalCompany, Workspace
+from core.governance.models import Company, GovernanceContract, Workspace
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
@@ -58,6 +58,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             GovernanceContract has 'owned_company_shares' through CompanyShares model
     '''
 
+### Serializers for registering
+########################################
 class WorkspaceCompanyContractSerializer(serializers.ModelSerializer):
     pass
 
@@ -68,36 +70,69 @@ class RegisterWorkspaceSerializer(serializers.ModelSerializer):
 
 
 class RegisterCompanySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Company
-        fields = ('name', 'reg_number', 'max_number_of_shares')
-
-class RegisterPersonalCompanySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PersonalCompany
-        fields = ('name')
+    pass
 
 
 
 
+
+########################################
+### Serializers for interacting with models
+########################################
 
 class GovernanceContractSerializer(serializers.ModelSerializer):
     class Meta:
         model = GovernanceContract
-        fields = ('contract_address', 'admin_address', 'governance_type')
+        fields = ['contract_address', 
+                  'admin_address', 
+                  'governance_type',
+                  'governed_company',
+                  'owned_company_shares'
+        ]
 
 class WorkspaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workspace
-        fields = ('workspace_name', 'workspace_description', 'workspace_logo' ,'workspace_owner', 'ws_governor_contract')
+        fields = ['workspace_name', 
+                  'workspace_description', 
+                  'workspace_logo', 
+                  'workspace_owner', 
+                  'ws_governor_company', 
+                  'workspace_members'
+        ]
+
+
 
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
-        fields = ('name', 'reg_number', 'max_number_of_shares')
+        fields = ['company_type', 
+                  'name', 
+                  'governing_contract', 
+                  'reg_number', 
+                  'max_number_of_shares', 
+                  'company_workspace',
+                  'shares_issued',
+                  'company_roles']
 
-class PersonalCompanySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PersonalCompany
-        fields = ('name')
+    def validate(self, data):
+        company_type = data.get('company_type')
+
+        errors = {}
+        if company_type == 'Business':
+            if data.get('reg_number') is None:
+                errors['reg_number'] = 'This field is required for Business type.'
+            if data.get('max_number_of_shares') is None:
+                errors['max_number_of_shares'] = 'This field is required for Business type.'
+        
+        elif company_type == 'Personal':
+            if data.get('reg_number') is not None:
+                errors['reg_number'] = 'This field should not be provided for Personal type.'
+            if data.get('max_number_of_shares') is not None:
+                errors['max_number_of_shares'] = 'This field should not be provided for Personal type.'
+
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        return data
 
