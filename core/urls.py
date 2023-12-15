@@ -10,10 +10,10 @@ from core.api.views import GreetingApi
 from core.tokenshare.views import AuthSpaView, NoAuthSpaView
 
 # USER AUTH API views / endpoints
-from core.api.auth_user_views import LoginAPIView, AuthUserApi, RegisterAPIView, check_authentication_status
+from core.api.auth_user_views import LoginAPIView, AuthUserApi, RegisterAPIView, SuperUserViewSet, check_authentication_status
 
 # API Views/endpoints for GOVERNANCE model classes
-from core.api.governance_views import WorkspaceViewSet, CompanyViewSet, GovernanceContractViewSet, CreateWorkspaceViewSet
+from core.api.governance_views import CompanyRoleViewSet, WorkspaceViewSet, CompanyViewSet, GovernanceContractViewSet, CreateWorkspaceViewSet
 
 from rest_framework.routers import DefaultRouter
 
@@ -22,6 +22,8 @@ router.register(r'api/workspaces', WorkspaceViewSet)
 router.register(r'api/companies', CompanyViewSet)
 router.register(r'api/contracts', GovernanceContractViewSet)
 router.register(r'api/create_workspace', CreateWorkspaceViewSet, basename='create_workspace')
+router.register(r'api/superuser', SuperUserViewSet, basename='superuser')
+router.register(r'api/company_role', CompanyRoleViewSet, basename='roles')
 
 
 urlpatterns = [

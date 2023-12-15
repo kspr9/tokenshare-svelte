@@ -31,13 +31,9 @@ class Company(models.Model):
 
     # Each Company instance can be represented/governed by one contract
     # does not represent 'owner' of a Company, rather 'a manager' or a 'governance space'
-        # If a governor company wants to 'own' shares, it is done
-        # by the governing contract owning CompanyShares
-    #governing_contract = models.OneToOneField(GovernanceContract, 
-    #                                     related_name='governed_company', 
-    #                                     on_delete=models.PROTECT, 
-    #                                     blank=True, null=True
-    #                                     )
+        # If a company wants to 'own' shares in other companies, it is done
+        # by the governing contract owning CompanyShares issued by the other company
+    
 
     # Conditionally applicable for 'Business' types only
     reg_number = models.PositiveIntegerField(blank=True, null=True)
@@ -51,13 +47,12 @@ class Company(models.Model):
         shares_issued
         company_roles
     '''
-    '''   
     
     # This property fetches all CompanyShares where the governing contract is this Company's governance contract
     @property
     def shares_owned(self):
-        return CompanyShares.objects.filter(governing_contract=self.governance_contract)
-    '''
+        return CompanyShare.objects.filter(governing_contract=self.governing_contract)
+
     # custom behaviour for when a company is deleted
     # NOTE! If the model instances are deleted in bulk using the QuerySet’s delete method, 
     # the custom delete method will not be called.
@@ -99,49 +94,9 @@ class GovernanceContract(models.Model):
     attributes via other models:
         owned_company_shares
     '''
-
-    ''' changed the relations - workspace now tied directly to Company
-    def clean(self):
-        # Check if both relations exist
-        if hasattr(self, 'governed_company') and hasattr(self, 'governed_personal_company'):
-            raise ValidationError("A GovernanceContract can't be related to both a Company and a PersonalCompany.")
-        
-        super().clean()  # call the parent's clean method.
-
-    def save(self, *args, **kwargs):
-        self.full_clean()  # run the clean method and validate the model instance.
-        super().save(*args, **kwargs)
-    '''
     
     def __str__(self):
         return f'{self.contract_address=} adminned by {self.admin_address}'
-
-
-'''
-class ProxyCompanyModel(models.Model):
-    # Governance Contract will be created after a company is created
-    # maybe handled by signals?
-    # maybe via view logic
-    # Once the associated Contract object is created, it will be assigned to this model
-
-    
-    # TODO: later, the admin user can be checked by the governance contract admin address
-    #       and user can be identified by which user commands the wallet address
-    # meaning that admin_user should eventually == owner of the admin_address of the governance contract
-    #admin_user = models.ForeignKey(User, 
-    #                               related_name='admin_in_companies', 
-    #                               on_delete=models.PROTECT)
-    
-    name = models.CharField(max_length=255)
-
-    class Meta:
-        abstract = True
-'''
-
-
-
-
-
 
 
 # Share Model (Intermediary for ManyToMany)
@@ -161,16 +116,12 @@ class CompanyShare(models.Model):
     share_type = models.CharField(max_length=10, choices=SHARE_CHOICES)
     date_issued = models.DateTimeField(auto_now_add=True)
     
-    ## Should CompanyShares have, instead of 'holder', a governing contract?
-    ## the idea is that the app should not care about to which user the shares belong to
-    ## it only cares about which contract governs the shares.
-    ## if you have access to the contract, then you are the one who owns, 
-    # and thus can govern
 
     # NOTE: for the purpose of keeping data synced, the transfer of shares should be
     #   --> performed through the portal involving a signature of the portal's main contract
     #   this way we can ensure the changes are reflected in the portal DB as well, and 
     #   transfers cannot happen merely by executing transactions on the blockchain
+    
     ''' Represents the Owner of a Share '''
     owning_contract = models.ForeignKey(GovernanceContract, 
                                            related_name='owned_company_shares',
@@ -205,22 +156,13 @@ class Workspace(models.Model):
                                         related_name='owned_workspace', 
                                         on_delete=models.PROTECT)
     
-    # WS governor contract
-    '''
-        
-    '''
+    # WS governor company
     ws_governor_company = models.OneToOneField(Company, 
                                          related_name='company_workspace', 
                                          blank=True, null=True, 
                                          on_delete=models.PROTECT)
     
-    # TODO: This might be redundant, as assets can be loaded via 
-    #   the ws_governor_contract.owned_company_shares.issuing_company.get_unique etc
-    #workspace_assets = models.ManyToManyField(Company, 
-    #                                          related_name='asset_in_workspace', 
-    #                                          blank=True)
-    # might be redundant, since permission to perform actions in 
-    # the governor company of the workspace, would be managed by CompanyRoles
+    
     workspace_members = models.ManyToManyField(User, 
                                                related_name='member_in_workspaces', 
                                                blank=True)
@@ -230,7 +172,7 @@ class Workspace(models.Model):
         return f"Workspace {self.workspace_name} is governed by contract: {self.ws_governor_company.governing_contract.contract_address}"
     
         
-# Role Model - giving role based privileges or responsibility in a company
+# Role Model - giving role based privileges or responsibility in a company, or in a workspace
 class CompanyRole(models.Model):
     
     ROLE_CHOICES = (

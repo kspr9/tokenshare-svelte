@@ -33,15 +33,16 @@ from rest_framework.response import Response
 
 ## Models import
 from core.accounts.models import User
-from ..governance.models import Workspace, Company, GovernanceContract
+from ..governance.models import CompanyRole, Workspace, Company, GovernanceContract
 
 ## Serializers import
-from .serializers import WorkspaceSerializer, CompanySerializer, GovernanceContractSerializer, WorkspaceCompanyContractSerializer
+from .serializers import CompanyRoleSerializer, WorkspaceSerializer, CompanySerializer, GovernanceContractSerializer, WorkspaceCompanyContractSerializer
 
 class WorkspaceViewSet(viewsets.ModelViewSet):
     queryset = Workspace.objects.all()
     serializer_class = WorkspaceSerializer
 
+    '''
     def get_queryset(self):
         """
         This view returns a list of all the workspaces
@@ -51,11 +52,13 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
         if user.is_authenticated:
             return Workspace.objects.filter(workspace_owner=user)
         return Workspace.objects.none()
+    '''
 
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
 
+    '''
     def get_queryset(self):
         """
         This view returns a list of all the companies
@@ -66,6 +69,7 @@ class CompanyViewSet(viewsets.ModelViewSet):
         if user.is_authenticated:
             return Company.objects.filter(governing_contract__admin_address=wallet_address)
         return Company.objects.none()
+    '''
 
 
 
@@ -90,3 +94,7 @@ class CreateWorkspaceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class CompanyRoleViewSet(viewsets.ModelViewSet):
+    queryset = CompanyRole.objects.all()
+    serializer_class = CompanyRoleSerializer

@@ -1,15 +1,24 @@
 from rest_framework import serializers
+from django.db import transaction
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import EmailValidator
 
-from core.governance.models import Company, GovernanceContract, Workspace
+from core.governance.models import Company, CompanyRole, CompanyShare, GovernanceContract, Workspace
 
+
+###                         ###
+###     APP SERIALIZERS     ###
+###                         ###
+
+## Used for logging in the user
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
+
+# Used for registering a new user in the app
 class RegisterSerializer(serializers.ModelSerializer):
     # Explicitly declare the fields you need for registration
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
@@ -58,18 +67,20 @@ class RegisterSerializer(serializers.ModelSerializer):
             GovernanceContract has 'owned_company_shares' through CompanyShares model
     '''
 
-### Serializers for registering
+#########################################
+###     Serializers for registering/creation
+###        still deciding if we need these
 ########################################
 class WorkspaceCompanyContractSerializer(serializers.ModelSerializer):
     pass
 
-class RegisterWorkspaceSerializer(serializers.ModelSerializer):
+class CreateWorkspaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workspace
         fields = ('workspace_name', 'workspace_description', 'workspace_logo')
 
 
-class RegisterCompanySerializer(serializers.ModelSerializer):
+class CreateCompanySerializer(serializers.ModelSerializer):
     pass
 
 
@@ -79,18 +90,57 @@ class RegisterCompanySerializer(serializers.ModelSerializer):
 ########################################
 ### Serializers for interacting with models
 ########################################
+User = get_user_model()
 
+class CompanyShareSerializer(serializers.ModelSerializer):
+    holder = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CompanyShare
+        fields = ['issuing_company', 
+                  'shares_amount', 
+                  'share_type', 
+                  'date_issued',
+                  'owning_contract',
+                  'date_last_ownership_change',
+                  'holder'
+        ]
+    
+    def get_holder(self, obj):
+        """
+        Returns the contract address of the holder.
+        """
+        return obj.holder
+
+class CompanyRoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyRole
+        fields = ['user', 'company', 'role_type']
+        
 class GovernanceContractSerializer(serializers.ModelSerializer):
+    owned_company_shares = CompanyShareSerializer(many=True, read_only=True)
+    governed_company = serializers.SerializerMethodField()
     class Meta:
         model = GovernanceContract
-        fields = ['contract_address', 
-                  'admin_address', 
+        fields = [ 
                   'governance_type',
+                  'contract_address',
+                  'admin_address', 
                   'governed_company',
                   'owned_company_shares'
         ]
 
+    def get_governed_company(self, obj):
+        from .serializers import CompanySerializer
+        if obj.governed_company is not None:
+            return CompanySerializer(obj.governed_company).data
+        return None
+
 class WorkspaceSerializer(serializers.ModelSerializer):
+    workspace_owner = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),
+        default=serializers.CurrentUserDefault())
+    ws_governor_company = serializers.SerializerMethodField()
+    workspace_members = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     class Meta:
         model = Workspace
         fields = ['workspace_name', 
@@ -101,9 +151,18 @@ class WorkspaceSerializer(serializers.ModelSerializer):
                   'workspace_members'
         ]
 
+    def get_ws_governor_company(self, obj):
+        from .serializers import CompanySerializer
+        if obj.ws_governor_company is not None:
+            return CompanySerializer(obj.ws_governor_company).data
+        return None
 
 
 class CompanySerializer(serializers.ModelSerializer):
+    company_workspace = WorkspaceSerializer()
+    governing_contract = GovernanceContractSerializer(read_only=True)
+    shares_issued = CompanyShareSerializer(many=True, read_only=True)
+    company_roles = CompanyRoleSerializer(many=True, read_only=True)
     class Meta:
         model = Company
         fields = ['company_type', 
@@ -114,6 +173,8 @@ class CompanySerializer(serializers.ModelSerializer):
                   'company_workspace',
                   'shares_issued',
                   'company_roles']
+    
+    
 
     def validate(self, data):
         company_type = data.get('company_type')
@@ -135,4 +196,28 @@ class CompanySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(errors)
 
         return data
+    
+
+    def create(self, validated_data):
+        
+        with transaction.atomic():
+            # Extract workspace data from the validated data
+            workspace_data = validated_data.pop('company_workspace', None)
+
+            # Create the Company instance
+            company = Company.objects.create(**validated_data)
+
+            # Create the Workspace instance, if workspace data is provided
+            if workspace_data:
+                # extract the user_id assuming workspace_owner provides the id
+                owner_id = workspace_data.pop('workspace_owner')
+                workspace_owner = User.objects.get(pk=owner_id)
+
+                workspace_data['workspace_owner'] = workspace_owner
+                workspace_data['ws_governor_company'] = company  # Set the company as the governor company
+                
+                Workspace.objects.create(**workspace_data)
+
+            # Return the newly created company instance
+            return company
 

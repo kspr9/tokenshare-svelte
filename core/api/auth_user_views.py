@@ -5,9 +5,14 @@ from rest_framework.response import Response
 from rest_framework import authentication, permissions
 from rest_framework.renderers import JSONRenderer
 
+from rest_framework.permissions import IsAdminUser
+from rest_framework.viewsets import ModelViewSet
+
 from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
+
+from core.api.auth_user_serializers import SuperuserUserSerializer
 from .serializers import LoginSerializer, RegisterSerializer
 
 from django.contrib.auth import get_user_model
@@ -129,3 +134,10 @@ class AuthUserApi(APIView):
         }
 
         return Response(response_data)
+
+# A viewset that a superuser can use to interact with User model
+class SuperUserViewSet(ModelViewSet):
+    User = get_user_model()
+    queryset = User.objects.all()
+    serializer_class = SuperuserUserSerializer
+    permission_classes = [IsAdminUser] 
