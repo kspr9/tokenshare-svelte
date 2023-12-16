@@ -31,7 +31,8 @@ class SuperuserUserSerializer(serializers.ModelSerializer):
                   'username', 
                   'first_name', 
                   'last_name', 
-                  'email', 
+                  'email',
+                  'password', 
                   'is_staff', 
                   'is_active', 
                   'is_superuser', 
@@ -94,7 +95,7 @@ class SuperuserUserSerializer(serializers.ModelSerializer):
             
             # Handle password update (if provided)
             password = validated_data.get('password')
-            if password:
+            if password is not None:
                 instance.set_password(password)
             
             instance.save()

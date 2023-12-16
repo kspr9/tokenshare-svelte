@@ -1,33 +1,64 @@
-<div>
+<script lang="ts">
+    import { Link } from "svelte-routing";
+    import { onMount } from 'svelte';
+
+    import WorkspaceCard from '../components/WorkspaceCard.svelte';
+
+    import { workspaces } from '../stores/workspacesStore';
+    import { companies } from '../stores/companiesStore';
+
+    import { fetchCompanies, fetchWorkspaces } from "../services/apiServiceForWS";
+
+
+    // Find the company name
+    function companyName(governorCompanyId: number) {
+        const company = $companies.find(c => c.id === governorCompanyId);
+        return company;
+    }
+
+    onMount(() => {
+        fetchWorkspaces();
+        fetchCompanies();
+    });
+
+</script>
+
+<div class="ws-container">
     <h1>Workspaces</h1>
 
+
     <div class="ws-items-container">
-        <div class="workspace-item">
-            <p>WS1</p>
-        </div>
-        <div class="workspace-item">
-            <p>WS2</p>
-        </div>
+        {#each $workspaces as workspace}
+            <div class="workspace-item">
+                <WorkspaceCard 
+                    workspace={workspace} 
+                    company={companyName(workspace.ws_governor_company)} 
+                />
+            </div>
+        {/each}
+        
         <div class="workspace-item">
             <!-- svelte-ignore a11y-invalid-attribute -->
-            <a href="#" class="link-style">
-                <div class="icon-plus app-clr"></div>
-            </a>
+            <Link to="/app/createWS"><div class="icon-plus app-clr"></div></Link>
         </div>
     </div>
 </div>
 <style>
-    .workspace-item {
-        background-color: #333;
-        width: 10ch;
-        padding: 2ch 0;
-        border-radius: 5px;
+    .ws-container {
+        width: 80vw;
     }
     .ws-items-container {
-        display: flex;
-        gap: 10px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 8px; /* Adjust the gap between items */
         box-sizing: border-box;
         
+    }
+    .workspace-item {
+        background-color: #333;
+        width: 35ch;
+        padding: 2ch 0;
+        border-radius: 5px;
     }
 
     .workspace-item > a {

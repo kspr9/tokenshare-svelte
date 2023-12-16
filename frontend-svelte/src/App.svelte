@@ -18,6 +18,7 @@
     //import AuthContent from "./components/AuthContent.svelte";
     //import MainLayout from "./layout/MainLayout.svelte";
     import Footer from "./components/Footer.svelte";
+    import CreateWS from "./components/CreateWS.svelte";
     import Login from "./content/Login.svelte";
     import Register from "./content/Register.svelte";
 
@@ -191,6 +192,7 @@
                 <Route path="/app/workspaces">
                     <Workspaces />
                 </Route>
+                <Route path="/app/createWS" component={CreateWS} />
                 <Route path="/app/messages" component={Messages} />
                 <Route path="/app/profile" component={Profile} />
                 <Route path="/app/settings" component={Settings} />
