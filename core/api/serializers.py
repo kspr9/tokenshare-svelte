@@ -20,7 +20,7 @@ class LoginSerializer(serializers.Serializer):
 
 # Used for registering a new user in the app
 class RegisterSerializer(serializers.ModelSerializer):
-    # Explicitly declare the fields you need for registration
+    # Explicitly declare the fields needed for registration
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
 
@@ -117,6 +117,28 @@ class CompanyRoleSerializer(serializers.ModelSerializer):
         model = CompanyRole
         fields = ['user', 'company', 'role_type']
         
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    # Flat serializer for create/update
+    class Meta:
+        model = Company
+        fields = '__all__'
+
+class WorkspaceSerializer(serializers.ModelSerializer):
+    # Flat serializer for create/update
+    class Meta:
+        model = Workspace
+        fields = '__all__'
+
+class GovernanceContractSerializer(serializers.ModelSerializer):
+    # Flat serializer for create/update
+    class Meta:
+        model = GovernanceContract
+        fields = '__all__'
+
+'''
+
 class GovernanceContractSerializer(serializers.ModelSerializer):
     owned_company_shares = CompanyShareSerializer(many=True, read_only=True)
     governed_company = serializers.SerializerMethodField()
@@ -139,8 +161,19 @@ class GovernanceContractSerializer(serializers.ModelSerializer):
 class WorkspaceSerializer(serializers.ModelSerializer):
     workspace_owner = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),
         default=serializers.CurrentUserDefault())
-    ws_governor_company = serializers.SerializerMethodField()
+    ws_governor_company = serializers.PrimaryKeyRelatedField(queryset=Company.objects.all())
     workspace_members = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+    def __init__(self, *args, **kwargs):
+        context = kwargs.get('context', {})
+        company = context.get('company')
+
+        # Modify the queryset based on the passed company instance
+        if company:
+            self.fields['ws_governor_company'].queryset = Company.objects.filter(id=company.id)
+        
+        super(WorkspaceSerializer, self).__init__(*args, **kwargs)
+
     class Meta:
         model = Workspace
         fields = ['workspace_name', 
@@ -151,11 +184,15 @@ class WorkspaceSerializer(serializers.ModelSerializer):
                   'workspace_members'
         ]
 
+    
+    """
     def get_ws_governor_company(self, obj):
         from .serializers import CompanySerializer
         if obj.ws_governor_company is not None:
             return CompanySerializer(obj.ws_governor_company).data
         return None
+    """
+    
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -163,6 +200,7 @@ class CompanySerializer(serializers.ModelSerializer):
     governing_contract = GovernanceContractSerializer(read_only=True)
     shares_issued = CompanyShareSerializer(many=True, read_only=True)
     company_roles = CompanyRoleSerializer(many=True, read_only=True)
+
     class Meta:
         model = Company
         fields = ['company_type', 
@@ -172,7 +210,17 @@ class CompanySerializer(serializers.ModelSerializer):
                   'max_number_of_shares', 
                   'company_workspace',
                   'shares_issued',
-                  'company_roles']
+                  'company_roles'
+                ]
+    
+    # this is to pass context to the WorkspaceSerializer
+    def to_representation(self, instance):
+        """
+        Object instance -> Dict of primitive datatypes.
+        """
+        # Pass the company instance as part of the context
+        self.fields['company_workspace'] = WorkspaceSerializer(context={'company': instance})
+        return super(CompanySerializer, self).to_representation(instance)
     
     
 
@@ -221,3 +269,5 @@ class CompanySerializer(serializers.ModelSerializer):
             # Return the newly created company instance
             return company
 
+
+'''

@@ -26,6 +26,8 @@
 '''
 
 
+from django.contrib.auth import get_user_model
+from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -70,6 +72,33 @@ class CompanyViewSet(viewsets.ModelViewSet):
             return Company.objects.filter(governing_contract__admin_address=wallet_address)
         return Company.objects.none()
     '''
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        # Custom logic for creating Workspace and GovernanceContract
+        response = super().create(request, *args, **kwargs)
+        
+        if response.status_code == 201:
+            company_id = response.data['id']
+            company = Company.objects.get(id=company_id)
+            # Retrieve the User instance
+            user = get_user_model().objects.get(id=request.user.id)
+
+            # Extract Workspace data from request
+            workspace_data = request.data.get('workspace_data', {})
+            workspace_data['ws_governor_company'] = company
+            workspace_data['workspace_owner'] = user
+            Workspace.objects.create(**workspace_data)
+
+            
+            # Extract GovernanceContract data from request
+            governance_data = request.data.get('governance_contract_data', {})
+            governance_data['governed_company'] = company
+            # Extract admin address from request, 
+            #or default to user wallet address if value missing from the governance_data
+            admin_address = governance_data.get('admin_address', request.user.user_wallet_address)
+            governance_data['admin_address'] = admin_address
+            GovernanceContract.objects.create(**governance_data)
+        return response
 
 
 
