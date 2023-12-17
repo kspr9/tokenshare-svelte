@@ -6,6 +6,7 @@ import { getCookie } from '../utils/cookie';
 // store imports
 import { workspaces } from '../stores/workspacesStore';
 import { companies } from '../stores/companiesStore';
+import { contracts } from '../stores/contractsStore';
 
 let csrfToken: string | any;
 
@@ -40,6 +41,49 @@ export const createWorkspace = async (requestBody: any): Promise<any> => {
 };
 
 
+
+export class APIService {
+
+  fetchWorkspaces = () => {
+    return this.apiFetch('/api/workspaces/');
+  }
+
+  fetchCompanies = () => {
+    return this.apiFetch('/api/companies/');
+  }
+
+  fetchContracts = () => {
+    return this.apiFetch('/api/contracts/');
+  }
+
+  async apiFetch(endpoint: string) {
+    try {
+
+      const response = await fetch(endpoint, {
+        method: 'GET', 
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken  
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.log(`Fetch Data for ${endpoint} not ok:`, data);
+        throw new Error('Network response was not ok');
+      }
+
+      console.log(`Success fetching ${endpoint} Data:`, data);
+
+      return data;
+
+    } catch (error) {
+      console.error(`Error fetching ${endpoint} data:`, error);
+    }
+  }
+}
+
 export async function fetchWorkspaces() {
   try {
     const response = await fetch('/api/workspaces/', {
@@ -61,9 +105,9 @@ export async function fetchWorkspaces() {
     workspaces.set(data);
 
     return data;
-    
+
   } catch (error) {
-    console.error('Error fetching workspaces:', error);
+    console.error('Error fetching workspaces data:', error);
   }
 }
 
@@ -91,6 +135,32 @@ export async function fetchCompanies() {
     return data;
 
   } catch (error) {
-    console.error('Error fetching company data:', error);
+    console.error('Error fetching companies data:', error);
   }
+}
+
+export async function fetchContracts() {
+  try {
+    const response = await fetch('/api/contracts/', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.log("Fetch Contract data not ok:", data);
+      throw new Error('Network response was not ok');
+    }
+
+    console.log("Success fetching Contract data:", data);
+    contracts.set(data);
+
+    return data;
+  } catch (error) {
+    console.error('Error fetching contracts data:', error);
+  } 
 }

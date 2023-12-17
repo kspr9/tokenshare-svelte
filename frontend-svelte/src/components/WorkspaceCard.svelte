@@ -21,5 +21,37 @@
 </div>
 
 <style>
-    /* Add your CSS styling here */
+    .card {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 20px;
+        background-color: #333;
+    }
+
+    .card-header {
+        background-color: #444;
+        padding: 15px 20px;
+        font-size: 1.2em;
+        font-weight: bold;
+        border-bottom: 1px solid #eee;
+    }
+
+    .card-body {
+        padding: 20px;
+        line-height: 1.5;
+    }
+
+    .card-body p {
+        margin: 0 0 10px;
+    }
+
+    .card-footer {
+        padding: 10px 20px;
+        background-color: #444;
+        text-align: right;
+        border-top: 1px solid #eee;
+    }
+
 </style>

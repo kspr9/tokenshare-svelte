@@ -10,7 +10,7 @@ from core.api.views import GreetingApi
 from core.tokenshare.views import AuthSpaView, NoAuthSpaView
 
 # USER AUTH API views / endpoints
-from core.api.auth_user_views import LoginAPIView, AuthUserApi, RegisterAPIView, SuperUserViewSet, check_authentication_status
+from core.api.auth_user_views import LoginAPIView, AuthUserApi, LogoutAPIView, RegisterAPIView, SuperUserViewSet, check_authentication_status
 
 # API Views/endpoints for GOVERNANCE model classes
 from core.api.governance_views import CompanyRoleViewSet, WorkspaceViewSet, CompanyViewSet, GovernanceContractViewSet, CreateWorkspaceViewSet
@@ -28,12 +28,13 @@ router.register(r'api/company_role', CompanyRoleViewSet, basename='roles')
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    #path("accounts/", include("django.contrib.auth.urls")),
+    path("accounts/", include("django.contrib.auth.urls")),
 
     # API endpoints for managing user authentication
     path('api/check-auth/', check_authentication_status, name='check-auth'),
     path("api/auth-user", AuthUserApi.as_view()),
     path('api/login', LoginAPIView.as_view(), name='api_login'),
+    path('api/logout', LogoutAPIView.as_view(), name='api_logout'),
     path('api/register', RegisterAPIView.as_view(), name='api_register'),
     
     # Main SPA views - 1) authenticated views, 2) unauthenticated views
